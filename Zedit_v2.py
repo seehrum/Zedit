@@ -27,7 +27,7 @@ class Zedit:
         self.edit_menu.add_command(label="Change Text Color", command=self.change_fg_color)
         self.edit_menu.add_command(label="Change Cursor Color", command=self.change_cursor_color)
         self.edit_menu.add_command(label="Change Selection Color", command=self.change_selection_color)
-        self.edit_menu.add_command(label="Change Selection Text Color", command=self.change_selection_text_color)  # New menu item
+        self.edit_menu.add_command(label="Change Selection Text Color", command=self.change_selection_text_color)
         self.edit_menu.add_command(label="Toggle Block Cursor", command=self.toggle_block_cursor)
         self.edit_menu.add_command(label="Change Font", command=self.change_font)
         self.edit_menu.add_command(label="Change Font Size", command=self.change_font_size)
@@ -43,15 +43,17 @@ class Zedit:
         self.root.config(menu=self.menu, bg=self.config['root_bg_color'])
         self.frame = tk.Frame(root, bg=self.config['bg_color'])
         self.frame.pack(expand=True)
-        self.current_font = font.Font(family=self.config['font_family'], size=self.config['font_size'])
+        self.current_font = font.Font(family=self.config['font_family'], size=self.config['font_size'],
+                                      weight="bold" if self.config.get('font_bold', False) else "normal",
+                                      slant="italic" if self.config.get('font_italic', False) else "roman")
         self.text_area = tk.Text(self.frame, font=self.current_font, bg=self.config['bg_color'], fg=self.config['fg_color'],
                                  insertbackground=self.config['cursor_color'], insertwidth=4 if self.config['block_cursor'] else 2,
                                  spacing3=self.config.get('line_spacing', 4), borderwidth=0, wrap=tk.WORD, highlightthickness=0,
                                  selectbackground=self.config.get('selection_color', '#3399ff'),
-                                 selectforeground=self.config.get('selection_text_color', '#ffffff'),  # Default selection text color
+                                 selectforeground=self.config.get('selection_text_color', '#ffffff'),
                                  width=self.config.get('text_width', 80), height=self.config.get('text_height', 25))
         self.text_area.pack(side="top", fill="both", expand="yes")
-        self.auto_save_interval = 5000  # Auto-save every 5 seconds
+        self.auto_save_interval = 5000
         self.auto_save()
 
     def load_config(self):
@@ -63,11 +65,13 @@ class Zedit:
         self.config.setdefault('root_bg_color', '#1e1e1e')
         self.config.setdefault('font_family', 'Arial')
         self.config.setdefault('font_size', 16)
+        self.config.setdefault('font_bold', False)
+        self.config.setdefault('font_italic', False)
         self.config.setdefault('bg_color', '#1e1e1e')
         self.config.setdefault('fg_color', '#ffffff')
         self.config.setdefault('cursor_color', 'white')
-        self.config.setdefault('selection_color', '#3399ff')  # Default selection background color
-        self.config.setdefault('selection_text_color', '#ffffff')  # Default selection text color
+        self.config.setdefault('selection_color', '#3399ff')
+        self.config.setdefault('selection_text_color', '#ffffff')
         self.config.setdefault('block_cursor', False)
         self.config.setdefault('text_width', 80)
         self.config.setdefault('text_height', 25)
@@ -170,6 +174,14 @@ class Zedit:
         font_listbox.config(yscrollcommand=scrollbar.set)
         for fnt in font.families():
             font_listbox.insert(tk.END, fnt)
+
+        is_bold = tk.BooleanVar(value=self.config.get('font_bold', False))
+        is_italic = tk.BooleanVar(value=self.config.get('font_italic', False))
+        bold_check = tk.Checkbutton(font_window, text="Bold", variable=is_bold)
+        italic_check = tk.Checkbutton(font_window, text="Italic", variable=is_italic)
+        bold_check.pack(side="top", fill="x")
+        italic_check.pack(side="top", fill="x")
+
         def on_font_select(event):
             selection = font_listbox.curselection()
             if selection:
@@ -178,10 +190,15 @@ class Zedit:
                 if font_size:
                     self.config['font_family'] = font_name
                     self.config['font_size'] = font_size
-                    self.current_font = font.Font(family=font_name, size=font_size)
+                    self.config['font_bold'] = is_bold.get()
+                    self.config['font_italic'] = is_italic.get()
+                    self.current_font = font.Font(family=font_name, size=font_size,
+                                                  weight="bold" if is_bold.get() else "normal",
+                                                  slant="italic" if is_italic.get() else "roman")
                     self.text_area.config(font=self.current_font)
                     self.save_config()
-                font_window.destroy()
+                    font_window.destroy()
+
         font_listbox.bind('<<ListboxSelect>>', on_font_select)
 
     def set_text_area_size(self):
@@ -204,7 +221,9 @@ class Zedit:
         font_size = simpledialog.askinteger("Font Size", "Enter font size:", initialvalue=self.config['font_size'])
         if font_size:
             self.config['font_size'] = font_size
-            self.current_font = font.Font(family=self.config['font_family'], size=font_size)
+            self.current_font = font.Font(family=self.config['font_family'], size=font_size,
+                                          weight="bold" if self.config.get('font_bold', False) else "normal",
+                                          slant="italic" if self.config.get('font_italic', False) else "roman")
             self.text_area.config(font=self.current_font)
             self.save_config()
 
@@ -215,9 +234,10 @@ class Zedit:
 
     def toggle_cursor_visibility(self):
         if self.text_area['cursor'] in ['', 'xterm']:
-           self.text_area.config(cursor='none')
+            self.text_area.config(cursor='none')
         else:
-           self.text_area.config(cursor='xterm')
+            self.text_area.config(cursor='xterm')
+
 if __name__ == "__main__":
     root = tk.Tk()
     editor = Zedit(root)
