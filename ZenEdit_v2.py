@@ -204,7 +204,7 @@ class ZenEdit:
             return
 
         all_text = self.text_area.get("1.0", tk.END)
-        count = all_text.lower().count(search_query.lower())
+        count = all_text.count(search_query)
         updated_text = all_text.replace(search_query, replacement)
         self.text_area.delete("1.0", tk.END)
         self.text_area.insert("1.0", updated_text)
