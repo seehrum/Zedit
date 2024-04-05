@@ -25,11 +25,15 @@ class ZenEdit:
         self.root.bind("<F2>", lambda event: self.quit())
         self.root.bind("<F10>", lambda event: self.open_file())
         self.root.bind("<F12>", lambda event: self.save_file())
+        self.root.bind("<F7>", self.search_text)
         self.menu = tk.Menu(root)
         self.file_menu = tk.Menu(self.menu, tearoff=0)
         self.file_menu.add_command(label="New (F9)", command=self.new_file)
         self.file_menu.add_command(label="Open (F10)", command=self.open_file)
         self.file_menu.add_command(label="Save (F12)", command=self.save_file)
+        self.file_menu.add_separator()
+        self.file_menu.add_command(label="Search (F7)", command=self.search_text)
+        self.file_menu.add_command(label="Replace", command=self.replace_text)
         self.file_menu.add_separator()
         self.file_menu.add_command(label="Exit (F2)", command=self.quit)
         self.edit_menu = tk.Menu(self.menu, tearoff=0)
@@ -162,6 +166,63 @@ class ZenEdit:
         if hasattr(self, 'text_area'):
             self.text_area.config(highlightbackground=self.config["border_color"])
 
+    def search_text(self, event=None):
+        search_query = simpledialog.askstring("Search", "Find what:")
+        if not search_query:
+            return
+
+        start_idx = '1.0'
+        count = 0
+        while True:
+            start_idx = self.text_area.search(search_query, start_idx, nocase=1, stopindex=tk.END)
+            if not start_idx:
+                break
+            count += 1
+            start_idx = f"{start_idx}+{len(search_query)}c"
+
+        messagebox.showinfo("Search", f"Found {count} occurrences.")
+
+    def replace_text(self, event=None):
+        search_query = simpledialog.askstring("Replace", "Find what:")
+        if not search_query:
+            return
+
+        replacement = simpledialog.askstring("Replace", "Replace with:")
+        if replacement is None:
+            return
+
+        all_text = self.text_area.get("1.0", tk.END)
+        count = all_text.lower().count(search_query.lower())
+        updated_text = all_text.replace(search_query, replacement)
+        self.text_area.delete("1.0", tk.END)
+        self.text_area.insert("1.0", updated_text)
+
+        messagebox.showinfo("Replace", f"Replaced {count} occurrences of '{search_query}' with '{replacement}'.")
+    
+    def search_text(self, event=None):
+        search_query = simpledialog.askstring("Search", "Find:")
+        if not search_query:
+            return
+
+    # Starting index for the search
+        start_idx = self.text_area.index(tk.INSERT)
+        search_idx = self.text_area.search(search_query, start_idx, nocase=1)
+
+    # If not found from current position to end, restart search from the beginning
+        if not search_idx:
+            search_idx = self.text_area.search(search_query, '1.0', nocase=1, stopindex=start_idx)
+
+        if search_idx:
+            end_idx = f"{search_idx}+{len(search_query)}c"
+            self.text_area.tag_remove(tk.SEL, '1.0', tk.END)  # Clear existing selection
+            self.text_area.tag_add(tk.SEL, search_idx, end_idx)  # Select found text
+            self.text_area.mark_set(tk.INSERT, end_idx)  # Move cursor to the end of the found text
+            self.text_area.see(search_idx)  # Scroll to the found text
+        else:
+            messagebox.showinfo("Search", "Text not found.")
+
+
+    
     def set_border_thickness(self):
         thickness = simpledialog.askinteger(
             "Set Border Thickness",
