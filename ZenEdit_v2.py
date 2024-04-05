@@ -335,23 +335,19 @@ class ZenEdit:
         elif response is False:
             self.text_area.delete(1.0, tk.END)
             self.text_area.edit_modified(False)
-
     def quit(self):
-        response = None
+        response = False
         if self.text_area.edit_modified():
-            response = messagebox.askyesnocancel(
-                "Save on Exit", "Do you want to save the changes before exiting?"
-            )
-            if response is True:
-                self.save_file()
-
-        if response is not True:
+            response = messagebox.askyesnocancel("Save on Exit", "Do you want to save the changes before exiting?")
+        if response is True:  # User chose to save changes
+            self.save_file()
+        elif response is None:  # User chose to cancel
+            return  # Exit the method and do not close the application
+        if response is not None:
             self.root.destroy()
 
     def open_file(self):
-        filepath = filedialog.askopenfilename(
-            filetypes=[("Text Files", "*.txt"), ("All Files", "*.*")]
-        )
+        filepath = filedialog.askopenfilename(filetypes=[("Text Files", "*.txt"), ("All Files", "*.*")])
         if not filepath:
             return
         self.text_area.delete(1.0, tk.END)
