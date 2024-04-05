@@ -35,6 +35,7 @@ class ZenEdit:
         self.file_menu.add_separator()
         self.file_menu.add_command(label="Search (F7)", command=self.search_text)
         self.file_menu.add_command(label="Replace (F8)", command=self.replace_text)
+        self.file_menu.add_command(label="Go to Line...", command=self.goto_line)
         self.file_menu.add_separator()
         self.file_menu.add_command(label="Exit (F2)", command=self.quit)
         self.edit_menu = tk.Menu(self.menu, tearoff=0)
@@ -166,6 +167,16 @@ class ZenEdit:
         self.config.setdefault("border_color", "#ffffff")  # Default border color
         if hasattr(self, 'text_area'):
             self.text_area.config(highlightbackground=self.config["border_color"])
+
+    def goto_line(self):
+        line_number = simpledialog.askinteger("Go to Line", "Enter line number:")
+        if line_number is not None and line_number > 0:
+            index = f"{line_number}.0"
+            if self.text_area.compare(index, "<=", "end"):
+                self.text_area.see(index)
+                self.text_area.mark_set("insert", index)
+                self.text_area.tag_remove(tk.SEL, "1.0", tk.END)
+                self.text_area.tag_add(tk.SEL, index, f"{index} lineend")
 
     def search_text(self, event=None):
         search_query = simpledialog.askstring("Search", "Find what:")
@@ -335,6 +346,7 @@ class ZenEdit:
         elif response is False:
             self.text_area.delete(1.0, tk.END)
             self.text_area.edit_modified(False)
+    
     def quit(self):
         response = False
         if self.text_area.edit_modified():
