@@ -11,10 +11,10 @@ from tkinter import (
 import json
 import os
 
-class Zedit:
+class ZenEdit:
     def __init__(self, root):
         self.root = root
-        self.root.title("Zedit")
+        self.root.title("ZenEdit")
         self.config_file = "editor_config.json"
         self.auto_save_file = "autosave.txt"
         self.load_config()
@@ -443,6 +443,6 @@ class Zedit:
 
 if __name__ == "__main__":
     root = tk.Tk()
-    editor = Zedit(root)  # Create an instance of Zedit
-    root.protocol("WM_DELETE_WINDOW", editor.quit)  # Bind the close event to the quit method of the editor instance
+    editor = ZenEdit(root)
+    root.protocol("WM_DELETE_WINDOW", editor.quit)
     root.mainloop()
