@@ -56,6 +56,9 @@ class ZenEdit:
             label="Change Border Color", command=self.change_border_color
         )
         self.edit_menu.add_command(
+            label="Set Border Thickness", command=self.set_border_thickness
+        )
+        self.edit_menu.add_command(
             label="Toggle Block Cursor", command=self.toggle_block_cursor
         )
         self.edit_menu.add_command(label="Change Font", command=self.change_font)
@@ -109,7 +112,7 @@ class ZenEdit:
             spacing3=self.config.get("line_spacing", 4),
             borderwidth=0,
             wrap=tk.WORD,
-            highlightthickness=0,
+            highlightthickness=self.config.get("border_thickness", 1),
             highlightbackground=self.config["border_color"],
             highlightcolor=self.config["border_color"],
             selectbackground=self.config.get("selection_color", "#3399ff"),
@@ -154,9 +157,21 @@ class ZenEdit:
         self.config.setdefault("text_width", 80)
         self.config.setdefault("text_height", 25)
         self.config.setdefault("line_spacing", 4)
+        self.config.setdefault("border_thickness", 1)
         self.config.setdefault("border_color", "#ffffff")  # Default border color
         if hasattr(self, 'text_area'):
             self.text_area.config(highlightbackground=self.config["border_color"])
+
+    def set_border_thickness(self):
+        thickness = simpledialog.askinteger(
+            "Set Border Thickness",
+            "Enter border thickness:",
+            initialvalue=self.config.get("border_thickness", 1)  # Default thickness is 1
+        )
+        if thickness is not None:  # Check if the user entered a value
+            self.config["border_thickness"] = thickness
+            self.text_area.config(highlightthickness=thickness)
+            self.save_config()
 
     def change_border_color(self):
         color = colorchooser.askcolor(title="Choose border color")[1]
