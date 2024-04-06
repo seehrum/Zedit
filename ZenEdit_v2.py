@@ -70,6 +70,12 @@ class ZenEdit:
         self.edit_menu.add_command(
             label="Toggle Block Cursor", command=self.toggle_block_cursor
         )
+        self.edit_menu.add_command(
+            label="Toggle Cursor Blink", command=self.toggle_cursor_blink
+        )
+        self.edit_menu.add_command(
+            label="Toggle Block Cursor Visibility", command=self.toggle_block_cursor_visibility
+        )
         self.edit_menu.add_command(label="Change Font", command=self.change_font)
         self.edit_menu.add_command(
             label="Change Font Size", command=self.change_font_size
@@ -338,12 +344,28 @@ class ZenEdit:
         current_thickness = self.text_area.cget("highlightthickness")
         new_thickness = 0 if current_thickness > 0 else 1
         self.text_area.config(highlightthickness=new_thickness)
-
+    
     def toggle_block_cursor(self):
         self.config["block_cursor"] = not self.config["block_cursor"]
         insert_width = 4 if self.config["block_cursor"] else 2
         self.text_area.config(insertwidth=insert_width)
         self.save_config()
+    
+    def toggle_cursor_blink(self):
+        if self.text_area['insertofftime'] == 0:
+            # Enable blink
+            self.text_area.config(insertofftime=300, insertontime=600)
+        else:
+            # Disable blink
+            self.text_area.config(insertofftime=0, insertontime=0)
+
+    def toggle_block_cursor_visibility(self):
+        if self.text_area['insertwidth'] > 1:
+            # Hide block cursor
+            self.text_area.config(insertwidth=0)
+        else:
+            # Show block cursor as a block
+            self.text_area.config(insertwidth=4)
 
     def change_font(self):
         font_window = Toplevel(self.root)
