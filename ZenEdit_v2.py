@@ -68,7 +68,7 @@ class ZenEdit:
             label="Set Border Thickness", command=self.set_border_thickness
         )
         self.edit_menu.add_command(
-            label="Toggle Block Cursor", command=self.toggle_block_cursor
+            label="Set Cursor Thickness", command=self.set_cursor_thickness
         )
         self.edit_menu.add_command(
             label="Toggle Cursor Blink", command=self.toggle_cursor_blink
@@ -345,11 +345,12 @@ class ZenEdit:
         new_thickness = 0 if current_thickness > 0 else 1
         self.text_area.config(highlightthickness=new_thickness)
     
-    def toggle_block_cursor(self):
-        self.config["block_cursor"] = not self.config["block_cursor"]
-        insert_width = 4 if self.config["block_cursor"] else 2
-        self.text_area.config(insertwidth=insert_width)
-        self.save_config()
+    def set_cursor_thickness(self):
+        thickness = simpledialog.askinteger("Cursor Thickness", "Enter cursor thickness:", initialvalue=self.config.get("insertwidth", 2))
+        if thickness is not None:
+            self.config["insertwidth"] = thickness
+            self.text_area.config(insertwidth=thickness)
+            self.save_config()
     
     def toggle_cursor_blink(self):
         if self.text_area['insertofftime'] == 0:
