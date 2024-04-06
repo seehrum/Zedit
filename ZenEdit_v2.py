@@ -98,6 +98,9 @@ class ZenEdit:
         self.view_menu.add_command(
             label="Toggle Cursor Visibility", command=self.toggle_cursor_visibility
         )
+        self.view_menu.add_command(
+            label="Set Padding", command=self.set_padding
+        )
 
         self.format_menu = tk.Menu(self.menu, tearoff=0)
         self.format_menu.add_command(label="Align Left", command=self.align_left)
@@ -472,6 +475,11 @@ class ZenEdit:
             self.config["text_height"] = height
             self.text_area.config(width=width, height=height)
             self.save_config()
+    
+    def set_padding(self):
+        padding = simpledialog.askinteger("Padding", "Enter padding size:", minvalue=0)
+        if padding is not None:
+            self.text_area.config(padx=padding, pady=padding)
 
     def toggle_cursor_visibility(self):
         if self.text_area["cursor"] in ["", "xterm"]:
