@@ -374,50 +374,66 @@ class ZenEdit:
             self.text_area.config(insertwidth=4)
 
     def change_font(self):
-        font_window = Toplevel(self.root)
+        font_window = tk.Toplevel(self.root)
         font_window.title("Choose Font")
-        font_listbox = Listbox(font_window)
+
+        # Font list
+        font_listbox = tk.Listbox(font_window, width=30, height=10)
         font_listbox.pack(side="left", fill="y")
-        scrollbar = tk.Scrollbar(
-            font_window, orient="vertical", command=font_listbox.yview
-        )
-        scrollbar.pack(side="right", fill="y")
+        scrollbar = tk.Scrollbar(font_window, command=font_listbox.yview)
+        scrollbar.pack(side="left", fill="y")
         font_listbox.config(yscrollcommand=scrollbar.set)
+
+        # Font preview
+        preview_text = "The quick brown fox jumps over the lazy dog"
+        preview_label = tk.Label(font_window, text=preview_text)
+        preview_label.pack(pady=10)
+
+        # Font options
+        is_bold = tk.BooleanVar(value=self.config.get("font_bold", False))
+        is_italic = tk.BooleanVar(value=self.config.get("font_italic", False))
+        font_size = tk.IntVar(value=self.config.get("font_size", 12))
+
+        tk.Checkbutton(font_window, text="Bold", variable=is_bold).pack()
+        tk.Checkbutton(font_window, text="Italic", variable=is_italic).pack()
+        size_entry = tk.Spinbox(font_window, from_=8, to=72, textvariable=font_size)
+        size_entry.pack()
+
+        def update_preview():
+            font_name = font_listbox.get(tk.ANCHOR)
+            bold = 'bold' if is_bold.get() else 'normal'
+            italic = 'italic' if is_italic.get() else 'roman'
+            size = font_size.get()
+            preview_font = font.Font(family=font_name, size=size, weight=bold, slant=italic)
+            preview_label.config(font=preview_font)
+
+        def apply_font():
+            self.config["font_family"] = font_listbox.get(tk.ANCHOR)
+            self.config["font_size"] = font_size.get()
+            self.config["font_bold"] = is_bold.get()
+            self.config["font_italic"] = is_italic.get()
+            self.current_font = font.Font(
+                family=self.config["font_family"],
+                size=self.config["font_size"],
+                weight='bold' if self.config["font_bold"] else 'normal',
+                slant='italic' if self.config["font_italic"] else 'roman',
+            )
+            self.text_area.config(font=self.current_font)
+            self.save_config()
+            font_window.destroy()
+
+        font_listbox.bind("<<ListboxSelect>>", lambda e: update_preview())
+        is_bold.trace('w', lambda *_: update_preview())
+        is_italic.trace('w', lambda *_: update_preview())
+        font_size.trace('w', lambda *_: update_preview())
+
         for fnt in font.families():
             font_listbox.insert(tk.END, fnt)
 
-        is_bold = tk.BooleanVar(value=self.config.get("font_bold", False))
-        is_italic = tk.BooleanVar(value=self.config.get("font_italic", False))
-        bold_check = tk.Checkbutton(font_window, text="Bold", variable=is_bold)
-        italic_check = tk.Checkbutton(font_window, text="Italic", variable=is_italic)
-        bold_check.pack(side="top", fill="x")
-        italic_check.pack(side="top", fill="x")
+        apply_button = tk.Button(font_window, text="Apply", command=apply_font)
+        apply_button.pack(pady=10)
 
-        def on_font_select(event):
-            selection = font_listbox.curselection()
-            if selection:
-                font_name = font_listbox.get(selection[0])
-                font_size = simpledialog.askinteger(
-                    "Font Size",
-                    "Enter font size:",
-                    initialvalue=self.config["font_size"],
-                )
-                if font_size:
-                    self.config["font_family"] = font_name
-                    self.config["font_size"] = font_size
-                    self.config["font_bold"] = is_bold.get()
-                    self.config["font_italic"] = is_italic.get()
-                    self.current_font = font.Font(
-                        family=font_name,
-                        size=font_size,
-                        weight="bold" if is_bold.get() else "normal",
-                        slant="italic" if is_italic.get() else "roman",
-                    )
-                    self.text_area.config(font=self.current_font)
-                    self.save_config()
-                    font_window.destroy()
-
-        font_listbox.bind("<<ListboxSelect>>", on_font_select)
+        update_preview()  # Initial update to set default preview
 
     def change_font_size(self):
         font_size = simpledialog.askinteger(
