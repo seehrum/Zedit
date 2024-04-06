@@ -11,6 +11,7 @@ from tkinter import (
 import json
 import os
 
+
 class ZenEdit:
     def __init__(self, root):
         self.root = root
@@ -19,15 +20,16 @@ class ZenEdit:
         self.auto_save_file = "autosave.txt"
         self.load_config()
         self.fullScreenState = False
-        self.root.bind("<F9>", lambda event: self.new_file())
-        self.root.bind("<F11>", self.toggleFullScreen)
-        self.root.bind("<F6>", lambda event: self.show_word_char_count())
         self.root.bind("<F2>", lambda event: self.quit())
-        self.root.bind("<F10>", lambda event: self.open_file())
-        self.root.bind("<F12>", lambda event: self.save_file())
+        self.root.bind("<F6>", lambda event: self.show_word_char_count())
         self.root.bind("<F7>", self.search_text)
         self.root.bind("<F8>", self.replace_text)
+        self.root.bind("<F9>", lambda event: self.new_file())
+        self.root.bind("<F10>", lambda event: self.open_file())
+        self.root.bind("<F11>", self.toggleFullScreen)
+        self.root.bind("<F12>", lambda event: self.save_file())
         self.menu = tk.Menu(root)
+
         self.file_menu = tk.Menu(self.menu, tearoff=0)
         self.file_menu.add_command(label="New (F9)", command=self.new_file)
         self.file_menu.add_command(label="Open (F10)", command=self.open_file)
@@ -38,6 +40,7 @@ class ZenEdit:
         self.file_menu.add_command(label="Go to Line...", command=self.goto_line)
         self.file_menu.add_separator()
         self.file_menu.add_command(label="Exit (F2)", command=self.quit)
+
         self.edit_menu = tk.Menu(self.menu, tearoff=0)
         self.edit_menu.add_command(
             label="Change Root Background Color", command=self.change_root_bg_color
@@ -75,11 +78,6 @@ class ZenEdit:
             label="Set Line Spacing", command=self.set_line_spacing
         )
 
-        self.format_menu = tk.Menu(self.menu, tearoff=0)
-        self.format_menu.add_command(label="Align Left", command=self.align_left)
-        self.format_menu.add_command(label="Center", command=self.align_center)
-        self.format_menu.add_command(label="Align Right", command=self.align_right)
-        
         self.view_menu = tk.Menu(self.menu, tearoff=0)
         self.view_menu.add_command(
             label="FullScreen (F11)", command=self.toggleFullScreen
@@ -94,10 +92,17 @@ class ZenEdit:
         self.view_menu.add_command(
             label="Toggle Cursor Visibility", command=self.toggle_cursor_visibility
         )
+
+        self.format_menu = tk.Menu(self.menu, tearoff=0)
+        self.format_menu.add_command(label="Align Left", command=self.align_left)
+        self.format_menu.add_command(label="Center", command=self.align_center)
+        self.format_menu.add_command(label="Align Right", command=self.align_right)
+
         self.menu.add_cascade(label="File", menu=self.file_menu)
         self.menu.add_cascade(label="Edit", menu=self.edit_menu)
         self.menu.add_cascade(label="View", menu=self.view_menu)
         self.menu.add_cascade(label="Format", menu=self.format_menu)
+
         self.root.config(menu=self.menu, bg=self.config["root_bg_color"])
         self.frame = tk.Frame(root, bg=self.config["bg_color"])
         self.frame.pack(expand=True)
@@ -107,6 +112,7 @@ class ZenEdit:
             weight="bold" if self.config.get("font_bold", False) else "normal",
             slant="italic" if self.config.get("font_italic", False) else "roman",
         )
+
         self.text_area = tk.Text(
             self.frame,
             font=self.current_font,
@@ -130,19 +136,19 @@ class ZenEdit:
         self.auto_save_interval = 5000
         self.auto_save()
 
-        self.text_area.bind('<Control-z>', self.undo_text)
-        self.text_area.bind('<Control-Z>', self.redo_text)
-        self.text_area.bind('<Control-y>', self.redo_text)
-        self.text_area.bind('<Control-Y>', self.redo_text)
-        self.text_area.bind('<Control-a>', self.select_all)
-        self.text_area.bind('<Control-A>', self.select_all)
-        self.text_area.bind('<Control-x>', self.cut_text)
-        self.text_area.bind('<Control-X>', self.cut_text)
-        self.text_area.bind('<Control-c>', self.copy_text)
-        self.text_area.bind('<Control-C>', self.copy_text)
-        self.text_area.bind('<Control-v>', self.paste_text)
-        self.text_area.bind('<Control-V>', self.paste_text)
-        
+        self.text_area.bind("<Control-z>", self.undo_text)
+        self.text_area.bind("<Control-Z>", self.redo_text)
+        self.text_area.bind("<Control-y>", self.redo_text)
+        self.text_area.bind("<Control-Y>", self.redo_text)
+        self.text_area.bind("<Control-a>", self.select_all)
+        self.text_area.bind("<Control-A>", self.select_all)
+        self.text_area.bind("<Control-x>", self.cut_text)
+        self.text_area.bind("<Control-X>", self.cut_text)
+        self.text_area.bind("<Control-c>", self.copy_text)
+        self.text_area.bind("<Control-C>", self.copy_text)
+        self.text_area.bind("<Control-v>", self.paste_text)
+        self.text_area.bind("<Control-V>", self.paste_text)
+
     def load_config(self):
         if os.path.isfile(self.config_file):
             with open(self.config_file, "r") as file:
@@ -165,175 +171,9 @@ class ZenEdit:
         self.config.setdefault("line_spacing", 4)
         self.config.setdefault("border_thickness", 1)
         self.config.setdefault("border_color", "#ffffff")  # Default border color
-        if hasattr(self, 'text_area'):
+        if hasattr(self, "text_area"):
             self.text_area.config(highlightbackground=self.config["border_color"])
 
-    def goto_line(self):
-        line_number = simpledialog.askinteger("Go to Line", "Enter line number:")
-        if line_number is not None and line_number > 0:
-            index = f"{line_number}.0"
-            if self.text_area.compare(index, "<=", "end"):
-                self.text_area.see(index)
-                self.text_area.mark_set("insert", index)
-                self.text_area.tag_remove(tk.SEL, "1.0", tk.END)
-                self.text_area.tag_add(tk.SEL, index, f"{index} lineend")
-
-    def search_text(self, event=None):
-        search_query = simpledialog.askstring("Search", "Find what:")
-        if not search_query:
-            return
-
-        start_idx = '1.0'
-        count = 0
-        while True:
-            start_idx = self.text_area.search(search_query, start_idx, nocase=1, stopindex=tk.END)
-            if not start_idx:
-                break
-            count += 1
-            start_idx = f"{start_idx}+{len(search_query)}c"
-
-        messagebox.showinfo("Search", f"Found {count} occurrences.")
-
-    def replace_text(self, event=None):
-        search_query = simpledialog.askstring("Replace", "Find what:")
-        if not search_query:
-            return
-
-        replacement = simpledialog.askstring("Replace", "Replace with:")
-        if replacement is None:
-            return
-
-        all_text = self.text_area.get("1.0", tk.END)
-        count = all_text.count(search_query)
-        updated_text = all_text.replace(search_query, replacement)
-        self.text_area.delete("1.0", tk.END)
-        self.text_area.insert("1.0", updated_text)
-
-        messagebox.showinfo("Replace", f"Replaced {count} occurrences of '{search_query}' with '{replacement}'.")
-    
-    def search_text(self, event=None):
-        search_query = simpledialog.askstring("Search", "Find:")
-        if not search_query:
-            return
-
-    # Starting index for the search
-        start_idx = self.text_area.index(tk.INSERT)
-        search_idx = self.text_area.search(search_query, start_idx, nocase=1)
-
-    # If not found from current position to end, restart search from the beginning
-        if not search_idx:
-            search_idx = self.text_area.search(search_query, '1.0', nocase=1, stopindex=start_idx)
-
-        if search_idx:
-            end_idx = f"{search_idx}+{len(search_query)}c"
-            self.text_area.tag_remove(tk.SEL, '1.0', tk.END)  # Clear existing selection
-            self.text_area.tag_add(tk.SEL, search_idx, end_idx)  # Select found text
-            self.text_area.mark_set(tk.INSERT, end_idx)  # Move cursor to the end of the found text
-            self.text_area.see(search_idx)  # Scroll to the found text
-        else:
-            messagebox.showinfo("Search", "Text not found.")
-
-
-    
-    def set_border_thickness(self):
-        thickness = simpledialog.askinteger(
-            "Set Border Thickness",
-            "Enter border thickness:",
-            initialvalue=self.config.get("border_thickness", 1)  # Default thickness is 1
-        )
-        if thickness is not None:  # Check if the user entered a value
-            self.config["border_thickness"] = thickness
-            self.text_area.config(highlightthickness=thickness)
-            self.save_config()
-
-    def change_border_color(self):
-        color = colorchooser.askcolor(title="Choose border color")[1]
-        if color:
-            self.config["border_color"] = color
-            self.text_area.config(highlightbackground=color, highlightcolor=color)
-            self.save_config()
-    
-    def undo_text(self, event=None):
-        try:
-            self.text_area.edit_undo()
-        except tk.TclError:
-            pass
-        return "break"
-
-    def redo_text(self, event=None):
-        try:
-            self.text_area.edit_redo()
-        except tk.TclError:
-            pass
-        return "break"
-
-    def select_all(self, event=None):
-        self.text_area.tag_add('sel', '1.0', 'end')
-        return "break"
-
-    def cut_text(self, event=None):
-        self.text_area.event_generate("<<Cut>>")
-        return "break"
-
-    def copy_text(self, event=None):
-        self.text_area.event_generate("<<Copy>>")
-        return "break"  
-
-    def paste_text(self, event=None):
-        self.text_area.event_generate("<<Paste>>")
-        return "break" 
-
-    def save_config(self):
-        with open(self.config_file, "w") as file:
-            json.dump(self.config, file, indent=4)
-
-    def auto_save(self):
-        with open(self.auto_save_file, "w") as file:
-            file.write(self.text_area.get(1.0, tk.END))
-        self.root.after(self.auto_save_interval, self.auto_save)
-
-    def toggleFullScreen(self, event=None):
-        self.fullScreenState = not self.fullScreenState
-        self.root.attributes("-fullscreen", self.fullScreenState)
-        if self.fullScreenState:
-            self.root.config(menu="")
-        else:
-            self.root.config(menu=self.menu)
-    def show_word_char_count(self):
-        text_content = self.text_area.get(1.0, "end-1c")  # Get content of text_area
-        words = len(text_content.split())
-        characters = len(text_content)
-
-    # Show the counts in a message box
-        messagebox.showinfo("Word/Character Count", f'Words: {words}\nCharacters: {characters}')
-            
-    def align_left(self):
-        self.text_area.tag_configure("left", justify='left')
-        self.apply_tag_to_selection("left")
-
-    def align_center(self):
-        self.text_area.tag_configure("center", justify='center')
-        self.apply_tag_to_selection("center")
-
-    def align_right(self):
-        self.text_area.tag_configure("right", justify='right')
-        self.apply_tag_to_selection("right")
-
-    def apply_tag_to_selection(self, tag):
-        # Clear existing alignment tags before applying the new one
-        self.clear_alignment_tags()
-
-        # Apply the given tag to the selected text. If no text is selected, apply to all text.
-        start_index = self.text_area.index("sel.first") if self.text_area.tag_ranges("sel") else "1.0"
-        end_index = self.text_area.index("sel.last") if self.text_area.tag_ranges("sel") else "end"
-        self.text_area.tag_add(tag, start_index, end_index)
-
-    def clear_alignment_tags(self):
-        # Remove existing alignment tags from the entire text
-        self.text_area.tag_remove("left", "1.0", "end")
-        self.text_area.tag_remove("center", "1.0", "end")
-        self.text_area.tag_remove("right", "1.0", "end")
-    
     def new_file(self):
         response = None
         if self.text_area.edit_modified():
@@ -346,20 +186,11 @@ class ZenEdit:
         elif response is False:
             self.text_area.delete(1.0, tk.END)
             self.text_area.edit_modified(False)
-    
-    def quit(self):
-        response = False
-        if self.text_area.edit_modified():
-            response = messagebox.askyesnocancel("Save on Exit", "Do you want to save the changes before exiting?")
-        if response is True:  # User chose to save changes
-            self.save_file()
-        elif response is None:  # User chose to cancel
-            return  # Exit the method and do not close the application
-        if response is not None:
-            self.root.destroy()
 
     def open_file(self):
-        filepath = filedialog.askopenfilename(filetypes=[("Text Files", "*.txt"), ("All Files", "*.*")])
+        filepath = filedialog.askopenfilename(
+            filetypes=[("Text Files", "*.txt"), ("All Files", "*.*")]
+        )
         if not filepath:
             return
         self.text_area.delete(1.0, tk.END)
@@ -376,11 +207,76 @@ class ZenEdit:
         with open(filepath, "w") as file:
             file.write(self.text_area.get(1.0, tk.END))
 
-    def toggle_block_cursor(self):
-        self.config["block_cursor"] = not self.config["block_cursor"]
-        insert_width = 4 if self.config["block_cursor"] else 2
-        self.text_area.config(insertwidth=insert_width)
-        self.save_config()
+    def search_text(self, event=None):
+        search_query = simpledialog.askstring("Search", "Find:")
+        if not search_query:
+            return
+        start_idx = self.text_area.index(tk.INSERT)
+        search_idx = self.text_area.search(search_query, start_idx, nocase=1)
+        if not search_idx:
+            search_idx = self.text_area.search(
+                search_query, "1.0", nocase=1, stopindex=start_idx
+            )
+        if search_idx:
+            end_idx = f"{search_idx}+{len(search_query)}c"
+            self.text_area.tag_remove(tk.SEL, "1.0", tk.END)  # Clear existing selection
+            self.text_area.tag_add(tk.SEL, search_idx, end_idx)  # Select found text
+            self.text_area.mark_set(
+                tk.INSERT, end_idx
+            )  # Move cursor to the end of the found text
+            self.text_area.see(search_idx)  # Scroll to the found text
+        else:
+            messagebox.showinfo("Search", "Text not found.")
+
+    def replace_text(self, event=None):
+        search_query = simpledialog.askstring("Replace", "Find what:")
+        if not search_query:
+            return
+
+        replacement = simpledialog.askstring("Replace", "Replace with:")
+        if replacement is None:
+            return
+
+        all_text = self.text_area.get("1.0", tk.END)
+        count = all_text.count(search_query)
+        updated_text = all_text.replace(search_query, replacement)
+        self.text_area.delete("1.0", tk.END)
+        self.text_area.insert("1.0", updated_text)
+
+        messagebox.showinfo(
+            "Replace",
+            f"Replaced {count} occurrences of '{search_query}' with '{replacement}'.",
+        )
+
+    def goto_line(self):
+        line_number = simpledialog.askinteger("Go to Line", "Enter line number:")
+        if line_number is not None and line_number > 0:
+            index = f"{line_number}.0"
+            if self.text_area.compare(index, "<=", "end"):
+                self.text_area.see(index)
+                self.text_area.mark_set("insert", index)
+                self.text_area.tag_remove(tk.SEL, "1.0", tk.END)
+                self.text_area.tag_add(tk.SEL, index, f"{index} lineend")
+
+    def quit(self):
+        response = False
+        if self.text_area.edit_modified():
+            response = messagebox.askyesnocancel(
+                "Save on Exit", "Do you want to save the changes before exiting?"
+            )
+        if response is True:  # User chose to save changes
+            self.save_file()
+        elif response is None:  # User chose to cancel
+            return  # Exit the method and do not close the application
+        if response is not None:
+            self.root.destroy()
+
+    def change_root_bg_color(self):
+        color = colorchooser.askcolor(title="Choose root background color")[1]
+        if color:
+            self.config["root_bg_color"] = color
+            self.root.config(bg=color)
+            self.save_config()
 
     def change_bg_color(self):
         color = colorchooser.askcolor(title="Choose background color")[1]
@@ -418,13 +314,37 @@ class ZenEdit:
             self.text_area.config(selectforeground=color)
             self.save_config()
 
-    def change_root_bg_color(self):
-        color = colorchooser.askcolor(title="Choose root background color")[1]
+    def change_border_color(self):
+        color = colorchooser.askcolor(title="Choose border color")[1]
         if color:
-            self.config["root_bg_color"] = color
-            self.root.config(bg=color)
+            self.config["border_color"] = color
+            self.text_area.config(highlightbackground=color, highlightcolor=color)
             self.save_config()
-            
+
+    def set_border_thickness(self):
+        thickness = simpledialog.askinteger(
+            "Set Border Thickness",
+            "Enter border thickness:",
+            initialvalue=self.config.get(
+                "border_thickness", 1
+            ),  # Default thickness is 1
+        )
+        if thickness is not None:  # Check if the user entered a value
+            self.config["border_thickness"] = thickness
+            self.text_area.config(highlightthickness=thickness)
+            self.save_config()
+
+    def toggle_border(self):
+        current_thickness = self.text_area.cget("highlightthickness")
+        new_thickness = 0 if current_thickness > 0 else 1
+        self.text_area.config(highlightthickness=new_thickness)
+
+    def toggle_block_cursor(self):
+        self.config["block_cursor"] = not self.config["block_cursor"]
+        insert_width = 4 if self.config["block_cursor"] else 2
+        self.text_area.config(insertwidth=insert_width)
+        self.save_config()
+
     def change_font(self):
         font_window = Toplevel(self.root)
         font_window.title("Choose Font")
@@ -471,6 +391,48 @@ class ZenEdit:
 
         font_listbox.bind("<<ListboxSelect>>", on_font_select)
 
+    def change_font_size(self):
+        font_size = simpledialog.askinteger(
+            "Font Size", "Enter font size:", initialvalue=self.config["font_size"]
+        )
+        if font_size:
+            self.config["font_size"] = font_size
+            self.current_font = font.Font(
+                family=self.config["font_family"],
+                size=font_size,
+                weight="bold" if self.config.get("font_bold", False) else "normal",
+                slant="italic" if self.config.get("font_italic", False) else "roman",
+            )
+            self.text_area.config(font=self.current_font)
+            self.save_config()
+
+    def set_line_spacing(self):
+        spacing = simpledialog.askfloat(
+            "Line Spacing",
+            "Enter line spacing:",
+            initialvalue=self.config.get("line_spacing", 4),
+        )
+        if spacing:
+            self.config["line_spacing"] = spacing
+            self.text_area.config(spacing3=spacing)
+            self.save_config()
+
+    def toggleFullScreen(self, event=None):
+        self.fullScreenState = not self.fullScreenState
+        self.root.attributes("-fullscreen", self.fullScreenState)
+        if self.fullScreenState:
+            self.root.config(menu="")
+        else:
+            self.root.config(menu=self.menu)
+
+    def show_word_char_count(self):
+        text_content = self.text_area.get(1.0, "end-1c")  # Get content of text_area
+        words = len(text_content.split())
+        characters = len(text_content)
+        messagebox.showinfo(
+            "Word/Character Count", f"Words: {words}\nCharacters: {characters}"
+        )
+
     def set_text_area_size(self):
         width = simpledialog.askinteger(
             "Text Area Width",
@@ -488,42 +450,81 @@ class ZenEdit:
             self.text_area.config(width=width, height=height)
             self.save_config()
 
-    def set_line_spacing(self):
-        spacing = simpledialog.askfloat(
-            "Line Spacing",
-            "Enter line spacing:",
-            initialvalue=self.config.get("line_spacing", 4),
-        )
-        if spacing:
-            self.config["line_spacing"] = spacing
-            self.text_area.config(spacing3=spacing)
-            self.save_config()
-
-    def change_font_size(self):
-        font_size = simpledialog.askinteger(
-            "Font Size", "Enter font size:", initialvalue=self.config["font_size"]
-        )
-        if font_size:
-            self.config["font_size"] = font_size
-            self.current_font = font.Font(
-                family=self.config["font_family"],
-                size=font_size,
-                weight="bold" if self.config.get("font_bold", False) else "normal",
-                slant="italic" if self.config.get("font_italic", False) else "roman",
-            )
-            self.text_area.config(font=self.current_font)
-            self.save_config()
-
-    def toggle_border(self):
-        current_thickness = self.text_area.cget("highlightthickness")
-        new_thickness = 0 if current_thickness > 0 else 1
-        self.text_area.config(highlightthickness=new_thickness)
-
     def toggle_cursor_visibility(self):
         if self.text_area["cursor"] in ["", "xterm"]:
             self.text_area.config(cursor="none")
         else:
             self.text_area.config(cursor="xterm")
+
+    def align_left(self):
+        self.text_area.tag_configure("left", justify="left")
+        self.apply_tag_to_selection("left")
+
+    def align_center(self):
+        self.text_area.tag_configure("center", justify="center")
+        self.apply_tag_to_selection("center")
+
+    def align_right(self):
+        self.text_area.tag_configure("right", justify="right")
+        self.apply_tag_to_selection("right")
+
+    def apply_tag_to_selection(self, tag):
+        self.clear_alignment_tags()
+        start_index = (
+            self.text_area.index("sel.first")
+            if self.text_area.tag_ranges("sel")
+            else "1.0"
+        )
+        end_index = (
+            self.text_area.index("sel.last")
+            if self.text_area.tag_ranges("sel")
+            else "end"
+        )
+        self.text_area.tag_add(tag, start_index, end_index)
+
+    def clear_alignment_tags(self):
+        self.text_area.tag_remove("left", "1.0", "end")
+        self.text_area.tag_remove("center", "1.0", "end")
+        self.text_area.tag_remove("right", "1.0", "end")
+
+    def undo_text(self, event=None):
+        try:
+            self.text_area.edit_undo()
+        except tk.TclError:
+            pass
+        return "break"
+
+    def redo_text(self, event=None):
+        try:
+            self.text_area.edit_redo()
+        except tk.TclError:
+            pass
+        return "break"
+
+    def select_all(self, event=None):
+        self.text_area.tag_add("sel", "1.0", "end")
+        return "break"
+
+    def cut_text(self, event=None):
+        self.text_area.event_generate("<<Cut>>")
+        return "break"
+
+    def copy_text(self, event=None):
+        self.text_area.event_generate("<<Copy>>")
+        return "break"
+
+    def paste_text(self, event=None):
+        self.text_area.event_generate("<<Paste>>")
+        return "break"
+
+    def auto_save(self):
+        with open(self.auto_save_file, "w") as file:
+            file.write(self.text_area.get(1.0, tk.END))
+        self.root.after(self.auto_save_interval, self.auto_save)
+
+    def save_config(self):
+        with open(self.config_file, "w") as file:
+            json.dump(self.config, file, indent=4)
 
 
 if __name__ == "__main__":
