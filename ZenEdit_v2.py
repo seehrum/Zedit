@@ -21,6 +21,7 @@ class ZenEdit:
         self.load_config()
         self.fullScreenState = False
         self.root.bind("<F2>", lambda event: self.quit())
+        self.root.bind("<F5>", lambda event: self.toggle_line_numbers())
         self.root.bind("<F6>", lambda event: self.show_word_char_count())
         self.root.bind("<F7>", self.search_text)
         self.root.bind("<F8>", self.replace_text)
@@ -91,6 +92,7 @@ class ZenEdit:
         self.view_menu.add_command(
             label="Word/Character Count (F6)", command=self.show_word_char_count
         )
+        self.view_menu.add_command(label="Toggle Line Numbers (F5)", command=self.toggle_line_numbers)
         self.view_menu.add_command(
             label="Set Text Area Size", command=self.set_text_area_size
         )
@@ -286,7 +288,7 @@ class ZenEdit:
             self.config["root_bg_color"] = color
             self.root.config(bg=color)
             self.save_config()
-
+    
     def change_bg_color(self):
         color = colorchooser.askcolor(title="Choose background color")[1]
         if color:
@@ -459,6 +461,18 @@ class ZenEdit:
             "Word/Character Count", f"Words: {words}\nCharacters: {characters}"
         )
 
+    def toggle_line_numbers(self):
+        lines = self.text_area.get('1.0', 'end-1c').split('\n')
+        if lines[0].split(".")[0].isdigit():
+            # Assume line numbers are present, so remove them
+            stripped_lines = [line.split('. ', 1)[-1] if '. ' in line else line for line in lines]
+        else:
+            # Add line numbers
+            stripped_lines = [f"{i+1}. {line}" for i, line in enumerate(lines)]
+
+        self.text_area.delete('1.0', 'end')
+        self.text_area.insert('1.0', '\n'.join(stripped_lines))
+
     def set_text_area_size(self):
         width = simpledialog.askinteger(
             "Text Area Width",
@@ -556,8 +570,7 @@ class ZenEdit:
     def save_config(self):
         with open(self.config_file, "w") as file:
             json.dump(self.config, file, indent=4)
-
-
+            
 if __name__ == "__main__":
     root = tk.Tk()
     editor = ZenEdit(root)
