@@ -119,6 +119,7 @@ class ZenEdit:
         self.menu.add_cascade(label="View", menu=self.view_menu)
         self.menu.add_cascade(label="Format", menu=self.format_menu)
         self.menu.add_cascade(label="Settings", menu=self.settings_menu)
+        self.menu.add_command(label="About", command=self.show_about)
 
         self.root.config(menu=self.menu, bg=self.config["root_bg_color"])
         self.frame = tk.Frame(root, bg=self.config["bg_color"])
@@ -572,7 +573,11 @@ class ZenEdit:
             messagebox.showinfo("Autosave Enabled", "Autosave feature has been enabled.")
         else:
             messagebox.showinfo("Autosave Disabled", "Autosave feature has been disabled.")
-            
+
+    def show_about(self):
+        about_text = "ZenEdit v2.0\nA simple text editor built with Tkinter."
+        messagebox.showinfo("About ZenEdit", about_text)
+
     def undo_text(self, event=None):
         try:
             self.text_area.edit_undo()
