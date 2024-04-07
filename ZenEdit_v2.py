@@ -148,6 +148,8 @@ class ZenEdit:
             selectforeground=self.config.get("selection_text_color", "#ffffff"),
             width=self.config.get("text_width", 80),
             height=self.config.get("text_height", 25),
+            padx=self.config.get("padding", 0),
+            pady=self.config.get("padding", 0)
         )
         self.text_area.pack(side="top", fill="both", expand="yes")
         self.auto_save_interval = 5000
@@ -187,9 +189,11 @@ class ZenEdit:
         self.config.setdefault("text_height", 25)
         self.config.setdefault("line_spacing", 4)
         self.config.setdefault("border_thickness", 1)
-        self.config.setdefault("border_color", "#ffffff")  # Default border color
+        self.config.setdefault("border_color", "#ffffff")
+        self.config.setdefault("padding", 0)
         if hasattr(self, "text_area"):
             self.text_area.config(highlightbackground=self.config["border_color"])
+            self.text_area.config(padx=self.config["padding"],pady=self.config["padding"])
 
     def new_file(self):
         response = None
@@ -516,6 +520,8 @@ class ZenEdit:
         padding = simpledialog.askinteger("Padding", "Enter padding size:", minvalue=0)
         if padding is not None:
             self.text_area.config(padx=padding, pady=padding)
+            self.config["padding"] = padding
+            self.save_config()
 
     def toggle_cursor_visibility(self):
         if self.text_area["cursor"] in ["", "xterm"]:
