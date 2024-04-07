@@ -20,6 +20,7 @@ class ZenEdit:
         self.auto_save_file = "autosave.txt"
         self.load_config()
         self.fullScreenState = False
+        self.auto_save_enabled = tk.BooleanVar(value=True)
         self.root.bind("<F2>", lambda event: self.quit())
         self.root.bind("<F5>", lambda event: self.toggle_line_numbers())
         self.root.bind("<F6>", lambda event: self.show_word_char_count())
@@ -109,10 +110,15 @@ class ZenEdit:
         self.format_menu.add_command(label="Center", command=self.align_center)
         self.format_menu.add_command(label="Align Right", command=self.align_right)
 
+        self.settings_menu = tk.Menu(self.menu, tearoff=0)
+        self.settings_menu.add_checkbutton(label="Enable Autosave", onvalue=True, offvalue=False, variable=self.auto_save_enabled, command=self.toggle_auto_save)
+
+
         self.menu.add_cascade(label="File", menu=self.file_menu)
         self.menu.add_cascade(label="Edit", menu=self.edit_menu)
         self.menu.add_cascade(label="View", menu=self.view_menu)
         self.menu.add_cascade(label="Format", menu=self.format_menu)
+        self.menu.add_cascade(label="Settings", menu=self.settings_menu)
 
         self.root.config(menu=self.menu, bg=self.config["root_bg_color"])
         self.frame = tk.Frame(root, bg=self.config["bg_color"])
@@ -547,7 +553,20 @@ class ZenEdit:
         self.text_area.tag_remove("left", "1.0", "end")
         self.text_area.tag_remove("center", "1.0", "end")
         self.text_area.tag_remove("right", "1.0", "end")
+    
+    def auto_save(self):
+        if self.auto_save_enabled.get():  # Check if autosave is enabled
+            with open(self.auto_save_file, "w") as file:
+                file.write(self.text_area.get(1.0, tk.END))
+        self.root.after(self.auto_save_interval, self.auto_save)  # Schedule next autosave
 
+    def toggle_auto_save(self):
+        # This method will be called whenever the autosave menu item is toggled
+        if self.auto_save_enabled.get():
+            messagebox.showinfo("Autosave Enabled", "Autosave feature has been enabled.")
+        else:
+            messagebox.showinfo("Autosave Disabled", "Autosave feature has been disabled.")
+            
     def undo_text(self, event=None):
         try:
             self.text_area.edit_undo()
@@ -577,12 +596,7 @@ class ZenEdit:
     def paste_text(self, event=None):
         self.text_area.event_generate("<<Paste>>")
         return "break"
-
-    def auto_save(self):
-        with open(self.auto_save_file, "w") as file:
-            file.write(self.text_area.get(1.0, tk.END))
-        self.root.after(self.auto_save_interval, self.auto_save)
-
+    
     def save_config(self):
         with open(self.config_file, "w") as file:
             json.dump(self.config, file, indent=4)
