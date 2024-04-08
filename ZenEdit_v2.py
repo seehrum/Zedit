@@ -518,9 +518,11 @@ class ZenEdit:
     
     def auto_save(self):
         if self.auto_save_enabled.get():  # Check if autosave is enabled
-            with open(self.auto_save_file, "w") as file:
+            # Determine the file path: use the current file path if available, otherwise fallback to a default
+            filepath = self.current_file_path if hasattr(self, 'current_file_path') and self.current_file_path else self.auto_save_file
+            with open(filepath, "w") as file:
                 file.write(self.text_area.get(1.0, tk.END))
-        self.root.after(self.auto_save_interval, self.auto_save)  # Schedule next autosave
+        self.root.after(self.auto_save_interval, self.auto_save) 
 #Settings
     def change_root_bg_color(self):
         color = colorchooser.askcolor(title="Choose root background color")[1]
