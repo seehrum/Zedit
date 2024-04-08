@@ -361,8 +361,15 @@ class ZenEdit:
         )
 
     def set_text_area_size(self):
-        # Ask the user for dimensions in pixels
-        dimensions = simpledialog.askstring("Text Area Size", "Enter size in pixels (width x height):")
+        # Get the current dimensions of the frame in pixels
+        current_width = self.frame.winfo_width()
+        current_height = self.frame.winfo_height()
+
+        # Format the current dimensions as a string
+        current_dimensions = f"{current_width}x{current_height}"
+
+        # Ask the user for dimensions in pixels, showing the current dimensions as the default
+        dimensions = simpledialog.askstring("Text Area Size", "Enter size in pixels (width x height):", initialvalue=current_dimensions)
         if dimensions and 'x' in dimensions:
             pixel_width, pixel_height = map(int, dimensions.split('x'))
 
