@@ -31,8 +31,8 @@ class ZenEdit:
         self.root.bind("<F10>", lambda event: self.open_file())
         self.root.bind("<F11>", self.toggleFullScreen)
         self.root.bind("<F12>", lambda event: self.save_file())
+
         self.menu = tk.Menu(root)
-        
         self.file_menu = tk.Menu(self.menu, tearoff=0)
         self.file_menu.add_command(label="New (F9)", command=self.new_file)
         self.file_menu.add_command(label="Open (F10)", command=self.open_file)
@@ -168,7 +168,7 @@ class ZenEdit:
         if hasattr(self, "text_area"):
             self.text_area.config(highlightbackground=self.config["border_color"])
             self.text_area.config(padx=self.config["padding"],pady=self.config["padding"])
-# File
+#File
     def new_file(self):
         response = None
         if self.text_area.edit_modified():
@@ -233,16 +233,44 @@ class ZenEdit:
             return  # Exit the method and do not close the application
         if response is not None:
             self.root.destroy()
-#Edit 
+#Edit
+    def undo_text(self, event=None):
+        try:
+            self.text_area.edit_undo()
+        except tk.TclError:
+            pass
+        return "break"
+
+    def redo_text(self, event=None):
+        try:
+            self.text_area.edit_redo()
+        except tk.TclError:
+            pass
+        return "break"
+
+    def copy_text(self, event=None):
+        self.text_area.event_generate("<<Copy>>")
+        return "break"
+
+    def cut_text(self, event=None):
+        self.text_area.event_generate("<<Cut>>")
+        return "break"
+    
+    def paste_text(self, event=None):
+        self.text_area.event_generate("<<Paste>>")
+        return "break"
+
+    def select_all(self, event=None):
+        self.text_area.tag_add("sel", "1.0", "end")
+        return "break"
+    
     def search_text(self, event=None):
         search_window = tk.Toplevel(self.root)
         search_window.title("Search")
-
         tk.Label(search_window, text="Find:").pack(side="left")
         search_entry = tk.Entry(search_window)
         search_entry.pack(side="left", fill="x", expand=True)
         search_entry.focus_set()
-
         case_sensitive = tk.BooleanVar(value=False)
         tk.Checkbutton(search_window, text="Case Sensitive", variable=case_sensitive).pack(side="left")
 
@@ -250,28 +278,23 @@ class ZenEdit:
             search_query = search_entry.get()
             if not search_query:
                 return
-
             if next:
                 start_idx = self.text_area.index(tk.SEL_LAST + "+1c")
             else:
                 start_idx = "1.0"
-
             search_args = {'nocase': not case_sensitive.get()}
             search_idx = self.text_area.search(search_query, start_idx, **search_args)
             if not search_idx:
                 messagebox.showinfo("Search", "Text not found.")
                 return
-
             end_idx = f"{search_idx}+{len(search_query)}c"
             self.text_area.tag_remove(tk.SEL, "1.0", tk.END)
             self.text_area.tag_add(tk.SEL, search_idx, end_idx)
             self.text_area.mark_set(tk.INSERT, end_idx)
             self.text_area.see(search_idx)
-
         tk.Button(search_window, text="Find", command=do_search).pack(side="left")
         tk.Button(search_window, text="Next", command=lambda: do_search(next=True)).pack(side="left")
         tk.Button(search_window, text="Close", command=search_window.destroy).pack(side="left")
-
         search_entry.bind("<Return>", lambda event: do_search())
         search_entry.bind("<Shift-Return>", lambda event: do_search(next=True))
     
@@ -279,17 +302,14 @@ class ZenEdit:
         search_query = simpledialog.askstring("Replace", "Find what:")
         if not search_query:
             return
-
         replacement = simpledialog.askstring("Replace", "Replace with:")
         if replacement is None:
             return
-
         all_text = self.text_area.get("1.0", tk.END)
         count = all_text.count(search_query)
         updated_text = all_text.replace(search_query, replacement)
         self.text_area.delete("1.0", tk.END)
         self.text_area.insert("1.0", updated_text)
-
         messagebox.showinfo(
             "Replace",
             f"Replaced {count} occurrences of '{search_query}' with '{replacement}'.",
@@ -312,16 +332,13 @@ class ZenEdit:
             self.root.config(menu="")
         else:
             self.root.config(menu=self.menu)
-    
+
     def toggle_line_numbers(self):
         lines = self.text_area.get('1.0', 'end-1c').split('\n')
         if lines[0].split(".")[0].isdigit():
-            # Assume line numbers are present, so remove them
             stripped_lines = [line.split('. ', 1)[-1] if '. ' in line else line for line in lines]
         else:
-            # Add line numbers
             stripped_lines = [f"{i+1}. {line}" for i, line in enumerate(lines)]
-
         self.text_area.delete('1.0', 'end')
         self.text_area.insert('1.0', '\n'.join(stripped_lines))
 
@@ -392,24 +409,17 @@ class ZenEdit:
     def change_font(self):
         font_window = tk.Toplevel(self.root)
         font_window.title("Choose Font")
-
-        # Font list
         font_listbox = tk.Listbox(font_window, width=30, height=10)
         font_listbox.pack(side="left", fill="y")
         scrollbar = tk.Scrollbar(font_window, command=font_listbox.yview)
         scrollbar.pack(side="left", fill="y")
         font_listbox.config(yscrollcommand=scrollbar.set)
-
-        # Font preview
         preview_text = "The quick brown fox jumps over the lazy dog"
         preview_label = tk.Label(font_window, text=preview_text)
         preview_label.pack(pady=10)
-
-        # Font options
         is_bold = tk.BooleanVar(value=self.config.get("font_bold", False))
         is_italic = tk.BooleanVar(value=self.config.get("font_italic", False))
         font_size = tk.IntVar(value=self.config.get("font_size", 12))
-
         tk.Checkbutton(font_window, text="Bold", variable=is_bold).pack()
         tk.Checkbutton(font_window, text="Italic", variable=is_italic).pack()
         size_entry = tk.Spinbox(font_window, from_=8, to=72, textvariable=font_size)
@@ -437,19 +447,15 @@ class ZenEdit:
             self.text_area.config(font=self.current_font)
             self.save_config()
             font_window.destroy()
-
         font_listbox.bind("<<ListboxSelect>>", lambda e: update_preview())
         is_bold.trace('w', lambda *_: update_preview())
         is_italic.trace('w', lambda *_: update_preview())
         font_size.trace('w', lambda *_: update_preview())
-
         for fnt in font.families():
             font_listbox.insert(tk.END, fnt)
-
         apply_button = tk.Button(font_window, text="Apply", command=apply_font)
         apply_button.pack(pady=10)
-
-        update_preview()  # Initial update to set default preview
+        update_preview()
 
     def change_font_size(self):
         font_size = simpledialog.askinteger(
@@ -541,8 +547,7 @@ class ZenEdit:
         self.menu.config(bg=bg_color, fg=fg_color, activebackground=active_bg_color, activeforeground=active_fg_color)
         for menu_item in [self.file_menu, self.edit_menu, self.view_menu, self.format_menu, self.settings_menu]:
             menu_item.config(bg=bg_color, fg=fg_color, activebackground=active_bg_color, activeforeground=active_fg_color)
-
-
+            
     def change_root_bg_color(self):
         color = colorchooser.askcolor(title="Choose root background color")[1]
         if color:
@@ -599,14 +604,13 @@ class ZenEdit:
             "Enter border thickness:",
             initialvalue=self.config.get(
                 "border_thickness", 1
-            ),  # Default thickness is 1
+            ),
         )
         if thickness is not None:  # Check if the user entered a value
             self.config["border_thickness"] = thickness
             self.text_area.config(highlightthickness=thickness)
             self.save_config()
 
-    
     def set_caret_cursor_thickness(self):
         thickness = simpledialog.askinteger("Caret Cursor Thickness", "Enter caret cursor thickness:", initialvalue=self.config.get("insertwidth", 2))
         if thickness is not None:
@@ -624,41 +628,11 @@ class ZenEdit:
     def show_about(self):
         about_text = "ZenEdit v2.0\nA simple text editor built with Tkinter."
         messagebox.showinfo("About ZenEdit", about_text)
-#shortcuts
-    def undo_text(self, event=None):
-        try:
-            self.text_area.edit_undo()
-        except tk.TclError:
-            pass
-        return "break"
 
-    def redo_text(self, event=None):
-        try:
-            self.text_area.edit_redo()
-        except tk.TclError:
-            pass
-        return "break"
-
-    def select_all(self, event=None):
-        self.text_area.tag_add("sel", "1.0", "end")
-        return "break"
-        
-    def cut_text(self, event=None):
-        self.text_area.event_generate("<<Cut>>")
-        return "break"
-
-    def copy_text(self, event=None):
-        self.text_area.event_generate("<<Copy>>")
-        return "break"
-
-    def paste_text(self, event=None):
-        self.text_area.event_generate("<<Paste>>")
-        return "break"
-    
     def save_config(self):
         with open(self.config_file, "w") as file:
             json.dump(self.config, file, indent=4)
-            
+
 if __name__ == "__main__":
     root = tk.Tk()
     editor = ZenEdit(root)
