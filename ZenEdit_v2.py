@@ -63,13 +63,13 @@ class ZenEdit:
             label="Toggle Mouse Cursor Visibility", command=self.toggle_mouse_cursor_visibility
         )
         self.view_menu.add_command(
-            label="Toggle Block Cursor Visibility", command=self.toggle_block_cursor_visibility
+            label="Toggle Caret Cursor Visibility", command=self.toggle_caret_cursor_visibility
         )
         self.view_menu.add_command(
-            label="Toggle Block Cursor Blink", command=self.toggle_block_cursor_blink
+            label="Toggle Caret Cursor Blink", command=self.toggle_caret_cursor_blink
         )
         self.view_menu.add_command(
-            label="Set Block Cursor Blink Speed", command=self.set_cursor_blink_speed
+            label="Set Caret Cursor Blink Speed", command=self.set_caret_cursor_blink_speed
         )
 
         self.format_menu = tk.Menu(self.menu, tearoff=0)
@@ -88,7 +88,7 @@ class ZenEdit:
             label="Change Background Color", command=self.change_bg_color
         )
         self.settings_menu.add_command(
-            label="Change Cursor Color", command=self.change_cursor_color
+            label="Change Caret Cursor Color", command=self.change_caret_cursor_color
         )
         self.settings_menu.add_command(
             label="Change Text Color", command=self.change_fg_color
@@ -107,7 +107,7 @@ class ZenEdit:
             label="Set Border Thickness", command=self.set_border_thickness
         )
         self.settings_menu.add_command(
-            label="Set Cursor Thickness", command=self.set_cursor_thickness
+            label="Set Caret Cursor Thickness", command=self.set_caret_cursor_thickness
         )
         self.settings_menu.add_checkbutton(label="Enable Autosave", onvalue=True, offvalue=False, variable=self.auto_save_enabled, command=self.toggle_auto_save)
 
@@ -135,8 +135,8 @@ class ZenEdit:
             undo=True,
             bg=self.config["bg_color"],
             fg=self.config["fg_color"],
-            insertbackground=self.config["cursor_color"],
-            insertwidth=4 if self.config["block_cursor"] else 2,
+            insertbackground=self.config["caret_cursor_color"],
+            insertwidth=4 if self.config["caret_cursor"] else 2,
             spacing3=self.config.get("line_spacing", 4),
             borderwidth=0,
             wrap=tk.WORD,
@@ -180,10 +180,10 @@ class ZenEdit:
         self.config.setdefault("font_italic", False)
         self.config.setdefault("bg_color", "#1e1e1e")
         self.config.setdefault("fg_color", "#ffffff")
-        self.config.setdefault("cursor_color", "white")
+        self.config.setdefault("caret_cursor_color", "white")
         self.config.setdefault("selection_color", "#3399ff")
         self.config.setdefault("selection_text_color", "#ffffff")
-        self.config.setdefault("block_cursor", False)
+        self.config.setdefault("caret_cursor", False)
         self.config.setdefault("text_width", 80)
         self.config.setdefault("text_height", 25)
         self.config.setdefault("line_spacing", 4)
@@ -256,7 +256,7 @@ class ZenEdit:
             self.text_area.tag_add(tk.SEL, search_idx, end_idx)  # Select found text
             self.text_area.mark_set(
                 tk.INSERT, end_idx
-            )  # Move cursor to the end of the found text
+            )
             self.text_area.see(search_idx)  # Scroll to the found text
         else:
             messagebox.showinfo("Search", "Text not found.")
@@ -354,23 +354,19 @@ class ZenEdit:
         else:
             self.text_area.config(cursor="xterm")
     
-    def toggle_block_cursor_visibility(self):
+    def toggle_caret_cursor_visibility(self):
         if self.text_area['insertwidth'] > 1:
-            # Hide block cursor
             self.text_area.config(insertwidth=0)
         else:
-            # Show block cursor as a block
             self.text_area.config(insertwidth=1)
     
-    def toggle_block_cursor_blink(self):
+    def toggle_caret_cursor_blink(self):
         if self.text_area['insertofftime'] == 0:
-            # Enable blink
             self.text_area.config(insertofftime=300, insertontime=600)
         else:
-            # Disable blink
             self.text_area.config(insertofftime=0, insertontime=0)
     
-    def set_cursor_blink_speed(self):
+    def set_caret_cursor_blink_speed(self):
         blink_time = simpledialog.askinteger(
             "Cursor Blink Speed",
             "Enter blink speed in milliseconds (0 for no blink):",
@@ -519,10 +515,10 @@ class ZenEdit:
             self.frame.config(bg=color)
             self.save_config()
     
-    def change_cursor_color(self):
+    def change_caret_cursor_color(self):
         color = colorchooser.askcolor(title="Choose cursor color")[1]
         if color:
-            self.config["cursor_color"] = color
+            self.config["caret_cursor_color"] = color
             self.text_area.config(insertbackground=color)
             self.save_config()
     
@@ -568,8 +564,8 @@ class ZenEdit:
             self.save_config()
 
     
-    def set_cursor_thickness(self):
-        thickness = simpledialog.askinteger("Cursor Thickness", "Enter cursor thickness:", initialvalue=self.config.get("insertwidth", 2))
+    def set_caret_cursor_thickness(self):
+        thickness = simpledialog.askinteger("Caret Cursor Thickness", "Enter caret cursor thickness:", initialvalue=self.config.get("insertwidth", 2))
         if thickness is not None:
             self.config["insertwidth"] = thickness
             self.text_area.config(insertwidth=thickness)
