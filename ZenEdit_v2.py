@@ -76,6 +76,7 @@ class ZenEdit:
 
         self.settings_menu = tk.Menu(self.menu, tearoff=0)
         self.settings_menu.add_command(label="Load Background Image", command=self.load_background_image)
+        self.settings_menu.add_command(label="Scale Background Image", command=self.scale_background_image)
         self.settings_menu.add_checkbutton(label="Dark Mode Menu", onvalue=True, offvalue=False, variable=self.darkmode_menu_enabled, command=self.toggle_darkmode_menu)
         self.settings_menu.add_command(label="Change Root Background Color", command=self.change_root_bg_color)
         self.settings_menu.add_command(label="Change Background Color", command=self.change_bg_color)
@@ -562,6 +563,18 @@ class ZenEdit:
 
         # Lower the background label to send it behind all other widgets
         self.bg_label.lower()
+
+    def scale_background_image(self):
+            if not self.bg_image:
+                return
+
+            # Example scaling: Reduce the size by half
+            # This is a basic example and may not maintain the perfect aspect ratio
+            # For more complex operations, consider using the Pillow library
+            scaled_image = self.bg_image.subsample(2, 2)  # Update the subsample values based on your needs
+
+            self.bg_label.config(image=scaled_image)
+            self.bg_label.image = scaled_image  # Keep a reference
 
     def toggle_darkmode_menu(self):
         if not hasattr(self, 'default_bg'):
