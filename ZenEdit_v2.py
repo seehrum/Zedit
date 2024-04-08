@@ -96,6 +96,8 @@ class ZenEdit:
         self.root.config(menu=self.menu, bg=self.config["root_bg_color"])
         self.frame = tk.Frame(root, bg=self.config["bg_color"])
         self.frame.pack(expand=True)
+        self.frame.config(width=self.config["text_width"], height=self.config["text_height"])
+        self.frame.pack_propagate(False)
         self.current_font = font.Font(
             family=self.config["font_family"],
             size=self.config["font_size"],
@@ -119,8 +121,8 @@ class ZenEdit:
             highlightcolor=self.config["border_color"],
             selectbackground=self.config.get("selection_color", "#3399ff"),
             selectforeground=self.config.get("selection_text_color", "#ffffff"),
-            width=self.config.get("text_width", 80),
-            height=self.config.get("text_height", 25),
+            width=self.config.get("text_width", 800),
+            height=self.config.get("text_height", 495),
             padx=self.config.get("padding", 0),
             pady=self.config.get("padding", 0)
         )
@@ -160,8 +162,8 @@ class ZenEdit:
         self.config.setdefault("selection_color", "#3399ff")
         self.config.setdefault("selection_text_color", "#ffffff")
         self.config.setdefault("caret_cursor", False)
-        self.config.setdefault("text_width", 67)
-        self.config.setdefault("text_height", 17)
+        self.config.setdefault("text_width", 800)
+        self.config.setdefault("text_height", 495)
         self.config.setdefault("line_spacing", 4)
         self.config.setdefault("border_thickness", 1)
         self.config.setdefault("border_color", "#ffffff")
