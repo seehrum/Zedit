@@ -14,6 +14,7 @@ import os
 class ZenEdit:
     def __init__(self, root):
         self.root = root
+        self.root.geometry("800x495")
         self.root.title("ZenEdit")
         self.config_file = "editor_config.json"
         self.auto_save_file = "autosave.txt"
@@ -159,8 +160,8 @@ class ZenEdit:
         self.config.setdefault("selection_color", "#3399ff")
         self.config.setdefault("selection_text_color", "#ffffff")
         self.config.setdefault("caret_cursor", False)
-        self.config.setdefault("text_width", 80)
-        self.config.setdefault("text_height", 25)
+        self.config.setdefault("text_width", 67)
+        self.config.setdefault("text_height", 17)
         self.config.setdefault("line_spacing", 4)
         self.config.setdefault("border_thickness", 1)
         self.config.setdefault("border_color", "#ffffff")
@@ -330,8 +331,17 @@ class ZenEdit:
         self.root.attributes("-fullscreen", self.fullScreenState)
         if self.fullScreenState:
             self.root.config(menu="")
+            screen_width = self.root.winfo_screenwidth()
+            screen_height = self.root.winfo_screenheight()
+            width = 800  # Set your desired width
+            height = 495  # Set your desired height
+            x = (screen_width - width) // 2
+            y = (screen_height - height) // 2
+            self.root.geometry(f"{width}x{height}+{x}+{y}")
         else:
             self.root.config(menu=self.menu)
+            self.root.geometry("800x495")
+            self.root.update_idletasks()
 
     def toggle_line_numbers(self):
         lines = self.text_area.get('1.0', 'end-1c').split('\n')
