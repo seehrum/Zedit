@@ -36,6 +36,7 @@ class ZenEdit:
         self.file_menu.add_command(label="New (F9)", command=self.new_file)
         self.file_menu.add_command(label="Open (F10)", command=self.open_file)
         self.file_menu.add_command(label="Save (F12)", command=self.save_file)
+        self.file_menu.add_command(label="Save As...", command=self.save_as_file)
         self.file_menu.add_separator()
         self.file_menu.add_command(label="Exit (F2)", command=self.quit)
 
@@ -215,11 +216,28 @@ class ZenEdit:
         )
         if not filepath:
             return
-        self.text_area.delete(1.0, tk.END)
         with open(filepath, "r") as file:
+            self.text_area.delete(1.0, tk.END)
             self.text_area.insert(tk.END, file.read())
+            self.current_file_path = filepath  # Store the current file path
+        self.root.title(f"ZenEdit - {os.path.basename(filepath)}")
 
     def save_file(self, event=None):
+        if hasattr(self, 'current_file_path') and self.current_file_path:
+            filepath = self.current_file_path
+        else:
+            filepath = filedialog.asksaveasfilename(
+                defaultextension=".txt",
+                filetypes=[("Text Files", "*.txt"), ("All Files", "*.*")],
+            )
+            if not filepath:
+                return
+            self.current_file_path = filepath  # Store the new file path
+        with open(filepath, "w") as file:
+            file.write(self.text_area.get(1.0, tk.END))
+        self.root.title(f"ZenEdit - {os.path.basename(filepath)}")
+
+    def save_as_file(self):
         filepath = filedialog.asksaveasfilename(
             defaultextension=".txt",
             filetypes=[("Text Files", "*.txt"), ("All Files", "*.*")],
@@ -228,6 +246,8 @@ class ZenEdit:
             return
         with open(filepath, "w") as file:
             file.write(self.text_area.get(1.0, tk.END))
+        self.current_file_path = filepath  # Update current file path
+        self.root.title(f"ZenEdit - {os.path.basename(filepath)}")
 
     def quit(self):
         response = False
