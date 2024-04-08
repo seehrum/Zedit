@@ -68,6 +68,9 @@ class ZenEdit:
         self.view_menu.add_command(
             label="Toggle Block Cursor Blink", command=self.toggle_block_cursor_blink
         )
+        self.view_menu.add_command(
+            label="Set Block Cursor Blink Speed", command=self.set_cursor_blink_speed
+        )
 
         self.format_menu = tk.Menu(self.menu, tearoff=0)
         self.format_menu.add_command(label="Change Font", command=self.change_font)
@@ -366,6 +369,15 @@ class ZenEdit:
         else:
             # Disable blink
             self.text_area.config(insertofftime=0, insertontime=0)
+    
+    def set_cursor_blink_speed(self):
+        blink_time = simpledialog.askinteger(
+            "Cursor Blink Speed",
+            "Enter blink speed in milliseconds (0 for no blink):",
+            minvalue=0
+        )
+        if blink_time is not None:
+            self.text_area.config(insertofftime=blink_time, insertontime=blink_time)
 #Format
     def change_font(self):
         font_window = tk.Toplevel(self.root)
@@ -527,7 +539,7 @@ class ZenEdit:
             self.config["fg_color"] = color
             self.text_area.config(fg=color)
             self.save_config()
-            
+
     def change_selection_text_color(self):
         color = colorchooser.askcolor(title="Choose selection text color")[1]
         if color:
