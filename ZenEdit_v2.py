@@ -562,7 +562,7 @@ class ZenEdit:
             self.menu.config(bg=bg_color, fg=fg_color, activebackground=active_bg_color, activeforeground=active_fg_color)
             for menu_item in [self.file_menu, self.edit_menu, self.view_menu, self.format_menu, self.settings_menu]:
                 menu_item.config(bg=bg_color, fg=fg_color, activebackground=active_bg_color, activeforeground=active_fg_color)
-
+    
     def load_background_image(self):
         # Ask the user to select an image file
         image_path = filedialog.askopenfilename(
@@ -575,16 +575,20 @@ class ZenEdit:
         if not image_path:
             return
 
-        # Load the image and update the background label
-        self.bg_image = tk.PhotoImage(file=image_path)
-        if hasattr(self, 'bg_label'):
-            self.bg_label.configure(image=self.bg_image)
-        else:
-            self.bg_label = tk.Label(self.root, image=self.bg_image)
-            # Center the label on the screen
-            self.bg_label.place(relx=0.5, rely=0.5, anchor='center')
+        try:
+            # Load the image and update the background label
+            self.bg_image = tk.PhotoImage(file=image_path)
+            if hasattr(self, 'bg_label'):
+                self.bg_label.configure(image=self.bg_image)
+            else:
+                self.bg_label = tk.Label(self.root, image=self.bg_image)
+                # Center the label on the screen
+                self.bg_label.place(relx=0.5, rely=0.5, anchor='center')
+            self.bg_label.lower()
 
-        self.bg_label.lower() 
+        except tk.TclError:
+            # Show an error message if the image format is not supported
+            messagebox.showerror("Error", "Unsupported image format. Please select a PNG or GIF file.")
 
     def change_root_bg_color(self):
         color = colorchooser.askcolor(title="Choose root background color")[1]
