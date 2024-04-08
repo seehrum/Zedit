@@ -18,7 +18,7 @@ class ZenEdit:
         self.config_file = "editor_config.json"
         self.auto_save_file = "autosave.txt"
         self.load_config()
-        self.change_color_menu_enabled = tk.BooleanVar(value=False)
+        self.darkmode_menu_enabled = tk.BooleanVar(value=False)
         self.auto_save_enabled = tk.BooleanVar(value=True)
         self.fullScreenState = False
 
@@ -67,7 +67,7 @@ class ZenEdit:
         self.format_menu.add_command(label="Align Right", command=self.align_right)
 
         self.settings_menu = tk.Menu(self.menu, tearoff=0)
-        self.settings_menu.add_checkbutton(label="Change Color Menu", onvalue=True, offvalue=False, variable=self.change_color_menu_enabled, command=self.toggle_change_color_menu)
+        self.settings_menu.add_checkbutton(label="Dark Mode Menu", onvalue=True, offvalue=False, variable=self.darkmode_menu_enabled, command=self.toggle_darkmode_menu)
         self.settings_menu.add_command(label="Change Root Background Color", command=self.change_root_bg_color)
         self.settings_menu.add_command(label="Change Background Color", command=self.change_bg_color)
         self.settings_menu.add_command(label="Change Caret Cursor Color", command=self.change_caret_cursor_color)
@@ -490,8 +490,7 @@ class ZenEdit:
                 file.write(self.text_area.get(1.0, tk.END))
         self.root.after(self.auto_save_interval, self.auto_save) 
 #Settings
-    def toggle_change_color_menu(self):
-        # Save the default colors if not already saved
+    def toggle_darkmode_menu(self):
         if not hasattr(self, 'default_bg'):
             self.default_bg = self.menu.cget('bg')
         if not hasattr(self, 'default_fg'):
@@ -501,20 +500,18 @@ class ZenEdit:
         if not hasattr(self, 'default_active_fg'):
             self.default_active_fg = self.menu.cget('activeforeground')
 
-        if self.change_color_menu_enabled.get():
-            # Choose colors through color chooser
-            fg_color = colorchooser.askcolor(title="Choose text color")[1]
-            bg_color = colorchooser.askcolor(title="Choose background color")[1]
-            active_fg_color = colorchooser.askcolor(title="Choose active text color")[1]
-            active_bg_color = colorchooser.askcolor(title="Choose active background color")[1]
+        if self.darkmode_menu_enabled.get():
+            fg_color = '#e4e6eb'
+            bg_color = '#3a3b3c'
+            active_fg_color = '#3a3b3c'
+            active_bg_color = '#e4e6eb'
         else:
             # Use the saved default colors
             fg_color = self.default_fg
             bg_color = self.default_bg
             active_fg_color = self.default_active_fg
             active_bg_color = self.default_active_bg
-
-        # Apply the chosen colors to the main menu and its submenus
+            
         self.menu.config(bg=bg_color, fg=fg_color, activebackground=active_bg_color, activeforeground=active_fg_color)
         for menu_item in [self.file_menu, self.edit_menu, self.view_menu, self.format_menu, self.settings_menu]:
             menu_item.config(bg=bg_color, fg=fg_color, activebackground=active_bg_color, activeforeground=active_fg_color)
