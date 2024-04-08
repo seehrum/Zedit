@@ -75,9 +75,8 @@ class ZenEdit:
         self.format_menu.add_command(label="Align Right", command=self.align_right)
 
         self.settings_menu = tk.Menu(self.menu, tearoff=0)
-        self.settings_menu.add_command(label="Load Background Image", command=self.load_background_image)
-        self.settings_menu.add_command(label="Scale Background Image", command=self.scale_background_image)
         self.settings_menu.add_checkbutton(label="Dark Mode Menu", onvalue=True, offvalue=False, variable=self.darkmode_menu_enabled, command=self.toggle_darkmode_menu)
+        self.settings_menu.add_command(label="Load Background Image", command=self.load_background_image)
         self.settings_menu.add_command(label="Change Root Background Color", command=self.change_root_bg_color)
         self.settings_menu.add_command(label="Change Background Color", command=self.change_bg_color)
         self.settings_menu.add_command(label="Change Caret Cursor Color", command=self.change_caret_cursor_color)
@@ -540,6 +539,30 @@ class ZenEdit:
                 file.write(self.text_area.get(1.0, tk.END))
         self.root.after(self.auto_save_interval, self.auto_save) 
 #Settings
+    def toggle_darkmode_menu(self):
+            if not hasattr(self, 'default_bg'):
+                self.default_bg = self.menu.cget('bg')
+            if not hasattr(self, 'default_fg'):
+                self.default_fg = self.menu.cget('fg')
+            if not hasattr(self, 'default_active_bg'):
+                self.default_active_bg = self.menu.cget('activebackground')
+            if not hasattr(self, 'default_active_fg'):
+                self.default_active_fg = self.menu.cget('activeforeground')
+            if self.darkmode_menu_enabled.get():
+                fg_color = '#e4e6eb'
+                bg_color = '#3a3b3c'
+                active_fg_color = '#3a3b3c'
+                active_bg_color = '#e4e6eb'
+            else:
+                # Use the saved default colors
+                fg_color = self.default_fg
+                bg_color = self.default_bg
+                active_fg_color = self.default_active_fg
+                active_bg_color = self.default_active_bg
+            self.menu.config(bg=bg_color, fg=fg_color, activebackground=active_bg_color, activeforeground=active_fg_color)
+            for menu_item in [self.file_menu, self.edit_menu, self.view_menu, self.format_menu, self.settings_menu]:
+                menu_item.config(bg=bg_color, fg=fg_color, activebackground=active_bg_color, activeforeground=active_fg_color)
+
     def load_background_image(self):
         # Ask the user to select an image file
         image_path = filedialog.askopenfilename(
@@ -547,10 +570,10 @@ class ZenEdit:
                 ("PNG Files", "*.png"),
                 ("JPEG Files", "*.jpg;*.jpeg"),
                 ("GIF Files", "*.gif"),
-                ("All Files", "*.*")  # This line ensures that all files can be seen in the dialog.
+                ("All Files", "*.*")
             ]
         )
-        if not image_path:  # No file selected
+        if not image_path:
             return
 
         # Load the image and update the background label
@@ -559,47 +582,11 @@ class ZenEdit:
             self.bg_label.configure(image=self.bg_image)
         else:
             self.bg_label = tk.Label(self.root, image=self.bg_image)
-            self.bg_label.place(x=0, y=0, relwidth=1, relheight=1)
+            # Center the label on the screen
+            self.bg_label.place(relx=0.5, rely=0.5, anchor='center')
 
-        # Lower the background label to send it behind all other widgets
-        self.bg_label.lower()
+        self.bg_label.lower() 
 
-    def scale_background_image(self):
-            if not self.bg_image:
-                return
-
-            # Example scaling: Reduce the size by half
-            # This is a basic example and may not maintain the perfect aspect ratio
-            # For more complex operations, consider using the Pillow library
-            scaled_image = self.bg_image.subsample(2, 2)  # Update the subsample values based on your needs
-
-            self.bg_label.config(image=scaled_image)
-            self.bg_label.image = scaled_image  # Keep a reference
-
-    def toggle_darkmode_menu(self):
-        if not hasattr(self, 'default_bg'):
-            self.default_bg = self.menu.cget('bg')
-        if not hasattr(self, 'default_fg'):
-            self.default_fg = self.menu.cget('fg')
-        if not hasattr(self, 'default_active_bg'):
-            self.default_active_bg = self.menu.cget('activebackground')
-        if not hasattr(self, 'default_active_fg'):
-            self.default_active_fg = self.menu.cget('activeforeground')
-        if self.darkmode_menu_enabled.get():
-            fg_color = '#e4e6eb'
-            bg_color = '#3a3b3c'
-            active_fg_color = '#3a3b3c'
-            active_bg_color = '#e4e6eb'
-        else:
-            # Use the saved default colors
-            fg_color = self.default_fg
-            bg_color = self.default_bg
-            active_fg_color = self.default_active_fg
-            active_bg_color = self.default_active_bg
-        self.menu.config(bg=bg_color, fg=fg_color, activebackground=active_bg_color, activeforeground=active_fg_color)
-        for menu_item in [self.file_menu, self.edit_menu, self.view_menu, self.format_menu, self.settings_menu]:
-            menu_item.config(bg=bg_color, fg=fg_color, activebackground=active_bg_color, activeforeground=active_fg_color)
-            
     def change_root_bg_color(self):
         color = colorchooser.askcolor(title="Choose root background color")[1]
         if color:
