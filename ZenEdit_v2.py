@@ -568,7 +568,6 @@ class ZenEdit:
         image_path = filedialog.askopenfilename(
             filetypes=[
                 ("PNG Files", "*.png"),
-                ("JPEG Files", "*.jpg;*.jpeg"),
                 ("GIF Files", "*.gif"),
                 ("All Files", "*.*")
             ]
