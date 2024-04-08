@@ -11,7 +11,6 @@ from tkinter import (
 import json
 import os
 
-
 class ZenEdit:
     def __init__(self, root):
         self.root = root
@@ -19,6 +18,7 @@ class ZenEdit:
         self.config_file = "editor_config.json"
         self.auto_save_file = "autosave.txt"
         self.load_config()
+        self.dark_mode_enabled = tk.BooleanVar(value=False)
         self.fullScreenState = False
         self.auto_save_enabled = tk.BooleanVar(value=True)
         self.root.bind("<F2>", lambda event: self.quit())
@@ -47,31 +47,15 @@ class ZenEdit:
         self.edit_menu.add_command(label="Toggle Line Numbers (F5)", command=self.toggle_line_numbers)
 
         self.view_menu = tk.Menu(self.menu, tearoff=0)
-        self.view_menu.add_command(
-            label="FullScreen (F11)", command=self.toggleFullScreen
-        )
-        self.view_menu.add_command(
-            label="Word/Character Count (F6)", command=self.show_word_char_count
-        )
-        self.view_menu.add_command(
-            label="Set Text Area Size", command=self.set_text_area_size
-        )
-        self.view_menu.add_command(
-            label="Set Padding", command=self.set_padding
-        )
+        self.view_menu.add_command(label="FullScreen (F11)", command=self.toggleFullScreen)
+        self.view_menu.add_command(label="Word/Character Count (F6)", command=self.show_word_char_count)
+        self.view_menu.add_command(label="Set Text Area Size", command=self.set_text_area_size)
+        self.view_menu.add_command(label="Set Padding", command=self.set_padding)
         self.view_menu.add_command(label="Toggle Border", command=self.toggle_border)
-        self.view_menu.add_command(
-            label="Toggle Mouse Cursor Visibility", command=self.toggle_mouse_cursor_visibility
-        )
-        self.view_menu.add_command(
-            label="Toggle Caret Cursor Visibility", command=self.toggle_caret_cursor_visibility
-        )
-        self.view_menu.add_command(
-            label="Toggle Caret Cursor Blink", command=self.toggle_caret_cursor_blink
-        )
-        self.view_menu.add_command(
-            label="Set Caret Cursor Blink Speed", command=self.set_caret_cursor_blink_speed
-        )
+        self.view_menu.add_command(label="Toggle Mouse Cursor Visibility", command=self.toggle_mouse_cursor_visibility)
+        self.view_menu.add_command(label="Toggle Caret Cursor Visibility", command=self.toggle_caret_cursor_visibility)
+        self.view_menu.add_command(label="Toggle Caret Cursor Blink", command=self.toggle_caret_cursor_blink)
+        self.view_menu.add_command(label="Set Caret Cursor Blink Speed", command=self.set_caret_cursor_blink_speed)
 
         self.format_menu = tk.Menu(self.menu, tearoff=0)
         self.format_menu.add_command(label="Change Font", command=self.change_font)
@@ -82,36 +66,17 @@ class ZenEdit:
         self.format_menu.add_command(label="Align Right", command=self.align_right)
 
         self.settings_menu = tk.Menu(self.menu, tearoff=0)
-        self.settings_menu.add_command(
-            label="Change Root Background Color", command=self.change_root_bg_color
-        )
-        self.settings_menu.add_command(
-            label="Change Background Color", command=self.change_bg_color
-        )
-        self.settings_menu.add_command(
-            label="Change Caret Cursor Color", command=self.change_caret_cursor_color
-        )
-        self.settings_menu.add_command(
-            label="Change Text Color", command=self.change_fg_color
-        )
-        self.settings_menu.add_command(
-            label="Change Selection Color", command=self.change_selection_color
-        )
-        self.settings_menu.add_command(
-            label="Change Selection Text Color",
-            command=self.change_selection_text_color,
-        )
-        self.settings_menu.add_command(
-            label="Change Border Color", command=self.change_border_color
-        )
-        self.settings_menu.add_command(
-            label="Set Border Thickness", command=self.set_border_thickness
-        )
-        self.settings_menu.add_command(
-            label="Set Caret Cursor Thickness", command=self.set_caret_cursor_thickness
-        )
+        self.settings_menu.add_checkbutton(label="Dark Mode", onvalue=True, offvalue=False, variable=self.dark_mode_enabled, command=self.toggle_dark_mode_menu)
+        self.settings_menu.add_command(label="Change Root Background Color", command=self.change_root_bg_color)
+        self.settings_menu.add_command(label="Change Background Color", command=self.change_bg_color)
+        self.settings_menu.add_command(label="Change Caret Cursor Color", command=self.change_caret_cursor_color)
+        self.settings_menu.add_command(label="Change Text Color", command=self.change_fg_color)
+        self.settings_menu.add_command(label="Change Selection Color", command=self.change_selection_color)
+        self.settings_menu.add_command(label="Change Selection Text Color", command=self.change_selection_text_color,)
+        self.settings_menu.add_command(label="Change Border Color", command=self.change_border_color)
+        self.settings_menu.add_command(label="Set Border Thickness", command=self.set_border_thickness)
+        self.settings_menu.add_command(label="Set Caret Cursor Thickness", command=self.set_caret_cursor_thickness)
         self.settings_menu.add_checkbutton(label="Enable Autosave", onvalue=True, offvalue=False, variable=self.auto_save_enabled, command=self.toggle_auto_save)
-
 
         self.menu.add_cascade(label="File", menu=self.file_menu)
         self.menu.add_cascade(label="Edit", menu=self.edit_menu)
@@ -524,6 +489,18 @@ class ZenEdit:
                 file.write(self.text_area.get(1.0, tk.END))
         self.root.after(self.auto_save_interval, self.auto_save) 
 #Settings
+    def toggle_dark_mode_menu(self):
+            if self.dark_mode_enabled.get():
+                fg_color = '#ffffff'  # White text
+                menu_bg = '#333333'   # Darker background for menus
+            else:
+                fg_color = '#333333'  # Black text
+                menu_bg = '#eeeeee'   # Lighter background for menus
+            # Apply colors to menus
+            self.menu.config(bg=menu_bg, fg=fg_color)
+            for menu in [self.file_menu, self.edit_menu, self.view_menu, self.format_menu, self.settings_menu]:
+                menu.config(bg=menu_bg, fg=fg_color)
+
     def change_root_bg_color(self):
         color = colorchooser.askcolor(title="Choose root background color")[1]
         if color:
