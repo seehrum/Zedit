@@ -37,54 +37,13 @@ class ZenEdit:
         self.file_menu.add_command(label="Open (F10)", command=self.open_file)
         self.file_menu.add_command(label="Save (F12)", command=self.save_file)
         self.file_menu.add_separator()
-        self.file_menu.add_command(label="Search (F7)", command=self.search_text)
-        self.file_menu.add_command(label="Replace (F8)", command=self.replace_text)
-        self.file_menu.add_command(label="Go to Line...", command=self.goto_line)
-        self.file_menu.add_separator()
         self.file_menu.add_command(label="Exit (F2)", command=self.quit)
 
         self.edit_menu = tk.Menu(self.menu, tearoff=0)
-        self.edit_menu.add_command(
-            label="Change Root Background Color", command=self.change_root_bg_color
-        )
-        self.edit_menu.add_command(
-            label="Change Background Color", command=self.change_bg_color
-        )
-        self.edit_menu.add_command(
-            label="Change Text Color", command=self.change_fg_color
-        )
-        self.edit_menu.add_command(
-            label="Change Cursor Color", command=self.change_cursor_color
-        )
-        self.edit_menu.add_command(
-            label="Change Selection Color", command=self.change_selection_color
-        )
-        self.edit_menu.add_command(
-            label="Change Selection Text Color",
-            command=self.change_selection_text_color,
-        )
-        self.edit_menu.add_command(
-            label="Change Border Color", command=self.change_border_color
-        )
-        self.edit_menu.add_command(
-            label="Set Border Thickness", command=self.set_border_thickness
-        )
-        self.edit_menu.add_command(
-            label="Set Cursor Thickness", command=self.set_cursor_thickness
-        )
-        self.edit_menu.add_command(
-            label="Toggle Cursor Blink", command=self.toggle_cursor_blink
-        )
-        self.edit_menu.add_command(
-            label="Toggle Block Cursor Visibility", command=self.toggle_block_cursor_visibility
-        )
-        self.edit_menu.add_command(label="Change Font", command=self.change_font)
-        self.edit_menu.add_command(
-            label="Change Font Size", command=self.change_font_size
-        )
-        self.edit_menu.add_command(
-            label="Set Line Spacing", command=self.set_line_spacing
-        )
+        self.edit_menu.add_command(label="Search (F7)", command=self.search_text)
+        self.edit_menu.add_command(label="Replace (F8)", command=self.replace_text)
+        self.edit_menu.add_command(label="Go to Line...", command=self.goto_line)
+        self.edit_menu.add_command(label="Toggle Line Numbers (F5)", command=self.toggle_line_numbers)
 
         self.view_menu = tk.Menu(self.menu, tearoff=0)
         self.view_menu.add_command(
@@ -93,24 +52,60 @@ class ZenEdit:
         self.view_menu.add_command(
             label="Word/Character Count (F6)", command=self.show_word_char_count
         )
-        self.view_menu.add_command(label="Toggle Line Numbers (F5)", command=self.toggle_line_numbers)
         self.view_menu.add_command(
             label="Set Text Area Size", command=self.set_text_area_size
-        )
-        self.view_menu.add_command(label="Toggle Border", command=self.toggle_border)
-        self.view_menu.add_command(
-            label="Toggle Cursor Visibility", command=self.toggle_cursor_visibility
         )
         self.view_menu.add_command(
             label="Set Padding", command=self.set_padding
         )
+        self.view_menu.add_command(label="Toggle Border", command=self.toggle_border)
+        self.view_menu.add_command(
+            label="Toggle Mouse Cursor Visibility", command=self.toggle_mouse_cursor_visibility
+        )
+        self.view_menu.add_command(
+            label="Toggle Block Cursor Visibility", command=self.toggle_block_cursor_visibility
+        )
+        self.view_menu.add_command(
+            label="Toggle Block Cursor Blink", command=self.toggle_block_cursor_blink
+        )
 
         self.format_menu = tk.Menu(self.menu, tearoff=0)
+        self.format_menu.add_command(label="Change Font", command=self.change_font)
+        self.format_menu.add_command(label="Change Font Size", command=self.change_font_size)
+        self.format_menu.add_command(label="Set Line Spacing", command=self.set_line_spacing)
         self.format_menu.add_command(label="Align Left", command=self.align_left)
         self.format_menu.add_command(label="Center", command=self.align_center)
         self.format_menu.add_command(label="Align Right", command=self.align_right)
 
         self.settings_menu = tk.Menu(self.menu, tearoff=0)
+        self.settings_menu.add_command(
+            label="Change Root Background Color", command=self.change_root_bg_color
+        )
+        self.settings_menu.add_command(
+            label="Change Background Color", command=self.change_bg_color
+        )
+        self.settings_menu.add_command(
+            label="Change Cursor Color", command=self.change_cursor_color
+        )
+        self.settings_menu.add_command(
+            label="Change Text Color", command=self.change_fg_color
+        )
+        self.settings_menu.add_command(
+            label="Change Selection Color", command=self.change_selection_color
+        )
+        self.settings_menu.add_command(
+            label="Change Selection Text Color",
+            command=self.change_selection_text_color,
+        )
+        self.settings_menu.add_command(
+            label="Change Border Color", command=self.change_border_color
+        )
+        self.settings_menu.add_command(
+            label="Set Border Thickness", command=self.set_border_thickness
+        )
+        self.settings_menu.add_command(
+            label="Set Cursor Thickness", command=self.set_cursor_thickness
+        )
         self.settings_menu.add_checkbutton(label="Enable Autosave", onvalue=True, offvalue=False, variable=self.auto_save_enabled, command=self.toggle_auto_save)
 
 
@@ -195,7 +190,7 @@ class ZenEdit:
         if hasattr(self, "text_area"):
             self.text_area.config(highlightbackground=self.config["border_color"])
             self.text_area.config(padx=self.config["padding"],pady=self.config["padding"])
-
+# File
     def new_file(self):
         response = None
         if self.text_area.edit_modified():
@@ -229,6 +224,19 @@ class ZenEdit:
         with open(filepath, "w") as file:
             file.write(self.text_area.get(1.0, tk.END))
 
+    def quit(self):
+        response = False
+        if self.text_area.edit_modified():
+            response = messagebox.askyesnocancel(
+                "Save on Exit", "Do you want to save the changes before exiting?"
+            )
+        if response is True:  # User chose to save changes
+            self.save_file()
+        elif response is None:  # User chose to cancel
+            return  # Exit the method and do not close the application
+        if response is not None:
+            self.root.destroy()
+#Edit 
     def search_text(self, event=None):
         search_query = simpledialog.askstring("Search", "Find:")
         if not search_query:
@@ -249,7 +257,7 @@ class ZenEdit:
             self.text_area.see(search_idx)  # Scroll to the found text
         else:
             messagebox.showinfo("Search", "Text not found.")
-
+    
     def replace_text(self, event=None):
         search_query = simpledialog.askstring("Replace", "Find what:")
         if not search_query:
@@ -269,7 +277,7 @@ class ZenEdit:
             "Replace",
             f"Replaced {count} occurrences of '{search_query}' with '{replacement}'.",
         )
-
+    
     def goto_line(self):
         line_number = simpledialog.askinteger("Go to Line", "Enter line number:")
         if line_number is not None and line_number > 0:
@@ -279,111 +287,86 @@ class ZenEdit:
                 self.text_area.mark_set("insert", index)
                 self.text_area.tag_remove(tk.SEL, "1.0", tk.END)
                 self.text_area.tag_add(tk.SEL, index, f"{index} lineend")
+#View
+    def toggleFullScreen(self, event=None):
+        self.fullScreenState = not self.fullScreenState
+        self.root.attributes("-fullscreen", self.fullScreenState)
+        if self.fullScreenState:
+            self.root.config(menu="")
+        else:
+            self.root.config(menu=self.menu)
+    
+    def toggle_line_numbers(self):
+        lines = self.text_area.get('1.0', 'end-1c').split('\n')
+        if lines[0].split(".")[0].isdigit():
+            # Assume line numbers are present, so remove them
+            stripped_lines = [line.split('. ', 1)[-1] if '. ' in line else line for line in lines]
+        else:
+            # Add line numbers
+            stripped_lines = [f"{i+1}. {line}" for i, line in enumerate(lines)]
 
-    def quit(self):
-        response = False
-        if self.text_area.edit_modified():
-            response = messagebox.askyesnocancel(
-                "Save on Exit", "Do you want to save the changes before exiting?"
-            )
-        if response is True:  # User chose to save changes
-            self.save_file()
-        elif response is None:  # User chose to cancel
-            return  # Exit the method and do not close the application
-        if response is not None:
-            self.root.destroy()
+        self.text_area.delete('1.0', 'end')
+        self.text_area.insert('1.0', '\n'.join(stripped_lines))
 
-    def change_root_bg_color(self):
-        color = colorchooser.askcolor(title="Choose root background color")[1]
-        if color:
-            self.config["root_bg_color"] = color
-            self.root.config(bg=color)
+    def show_word_char_count(self):
+        text_content = self.text_area.get(1.0, "end-1c")  # Get content of text_area
+        words = len(text_content.split())
+        characters = len(text_content)
+        messagebox.showinfo(
+            "Word/Character Count", f"Words: {words}\nCharacters: {characters}"
+        )
+
+    def set_text_area_size(self):
+        width = simpledialog.askinteger(
+            "Text Area Width",
+            "Enter width:",
+            initialvalue=self.config.get("text_width", 80),
+        )
+        height = simpledialog.askinteger(
+            "Text Area Height",
+            "Enter height:",
+            initialvalue=self.config.get("text_height", 25),
+        )
+        if width and height:
+            self.config["text_width"] = width
+            self.config["text_height"] = height
+            self.text_area.config(width=width, height=height)
             self.save_config()
     
-    def change_bg_color(self):
-        color = colorchooser.askcolor(title="Choose background color")[1]
-        if color:
-            self.config["bg_color"] = color
-            self.text_area.config(bg=color)
-            self.frame.config(bg=color)
+    def set_padding(self):
+        padding = simpledialog.askinteger("Padding", "Enter padding size:", minvalue=0)
+        if padding is not None:
+            self.text_area.config(padx=padding, pady=padding)
+            self.config["padding"] = padding
             self.save_config()
-
-    def change_fg_color(self):
-        color = colorchooser.askcolor(title="Choose text color")[1]
-        if color:
-            self.config["fg_color"] = color
-            self.text_area.config(fg=color)
-            self.save_config()
-
-    def change_cursor_color(self):
-        color = colorchooser.askcolor(title="Choose cursor color")[1]
-        if color:
-            self.config["cursor_color"] = color
-            self.text_area.config(insertbackground=color)
-            self.save_config()
-
-    def change_selection_color(self):
-        color = colorchooser.askcolor(title="Choose selection color")[1]
-        if color:
-            self.config["selection_color"] = color
-            self.text_area.config(selectbackground=color)
-            self.save_config()
-
-    def change_selection_text_color(self):
-        color = colorchooser.askcolor(title="Choose selection text color")[1]
-        if color:
-            self.config["selection_text_color"] = color
-            self.text_area.config(selectforeground=color)
-            self.save_config()
-
-    def change_border_color(self):
-        color = colorchooser.askcolor(title="Choose border color")[1]
-        if color:
-            self.config["border_color"] = color
-            self.text_area.config(highlightbackground=color, highlightcolor=color)
-            self.save_config()
-
-    def set_border_thickness(self):
-        thickness = simpledialog.askinteger(
-            "Set Border Thickness",
-            "Enter border thickness:",
-            initialvalue=self.config.get(
-                "border_thickness", 1
-            ),  # Default thickness is 1
-        )
-        if thickness is not None:  # Check if the user entered a value
-            self.config["border_thickness"] = thickness
-            self.text_area.config(highlightthickness=thickness)
-            self.save_config()
-
+    
     def toggle_border(self):
         current_thickness = self.text_area.cget("highlightthickness")
         new_thickness = 0 if current_thickness > 0 else 1
         self.text_area.config(highlightthickness=new_thickness)
     
-    def set_cursor_thickness(self):
-        thickness = simpledialog.askinteger("Cursor Thickness", "Enter cursor thickness:", initialvalue=self.config.get("insertwidth", 2))
-        if thickness is not None:
-            self.config["insertwidth"] = thickness
-            self.text_area.config(insertwidth=thickness)
-            self.save_config()
-    
-    def toggle_cursor_blink(self):
-        if self.text_area['insertofftime'] == 0:
-            # Enable blink
-            self.text_area.config(insertofftime=300, insertontime=600)
+    def toggle_mouse_cursor_visibility(self):
+        if self.text_area["cursor"] in ["", "xterm"]:
+            self.text_area.config(cursor="none")
         else:
-            # Disable blink
-            self.text_area.config(insertofftime=0, insertontime=0)
-
+            self.text_area.config(cursor="xterm")
+    
     def toggle_block_cursor_visibility(self):
         if self.text_area['insertwidth'] > 1:
             # Hide block cursor
             self.text_area.config(insertwidth=0)
         else:
             # Show block cursor as a block
-            self.text_area.config(insertwidth=4)
-
+            self.text_area.config(insertwidth=1)
+    
+    def toggle_block_cursor_blink(self):
+        if self.text_area['insertofftime'] == 0:
+            # Enable blink
+            self.text_area.config(insertofftime=300, insertontime=600)
+        else:
+            # Disable blink
+            self.text_area.config(insertofftime=0, insertontime=0)
+#Format
     def change_font(self):
         font_window = tk.Toplevel(self.root)
         font_window.title("Choose Font")
@@ -460,7 +443,7 @@ class ZenEdit:
             )
             self.text_area.config(font=self.current_font)
             self.save_config()
-
+    
     def set_line_spacing(self):
         spacing = simpledialog.askfloat(
             "Line Spacing",
@@ -471,64 +454,6 @@ class ZenEdit:
             self.config["line_spacing"] = spacing
             self.text_area.config(spacing3=spacing)
             self.save_config()
-
-    def toggleFullScreen(self, event=None):
-        self.fullScreenState = not self.fullScreenState
-        self.root.attributes("-fullscreen", self.fullScreenState)
-        if self.fullScreenState:
-            self.root.config(menu="")
-        else:
-            self.root.config(menu=self.menu)
-
-    def show_word_char_count(self):
-        text_content = self.text_area.get(1.0, "end-1c")  # Get content of text_area
-        words = len(text_content.split())
-        characters = len(text_content)
-        messagebox.showinfo(
-            "Word/Character Count", f"Words: {words}\nCharacters: {characters}"
-        )
-
-    def toggle_line_numbers(self):
-        lines = self.text_area.get('1.0', 'end-1c').split('\n')
-        if lines[0].split(".")[0].isdigit():
-            # Assume line numbers are present, so remove them
-            stripped_lines = [line.split('. ', 1)[-1] if '. ' in line else line for line in lines]
-        else:
-            # Add line numbers
-            stripped_lines = [f"{i+1}. {line}" for i, line in enumerate(lines)]
-
-        self.text_area.delete('1.0', 'end')
-        self.text_area.insert('1.0', '\n'.join(stripped_lines))
-
-    def set_text_area_size(self):
-        width = simpledialog.askinteger(
-            "Text Area Width",
-            "Enter width:",
-            initialvalue=self.config.get("text_width", 80),
-        )
-        height = simpledialog.askinteger(
-            "Text Area Height",
-            "Enter height:",
-            initialvalue=self.config.get("text_height", 25),
-        )
-        if width and height:
-            self.config["text_width"] = width
-            self.config["text_height"] = height
-            self.text_area.config(width=width, height=height)
-            self.save_config()
-    
-    def set_padding(self):
-        padding = simpledialog.askinteger("Padding", "Enter padding size:", minvalue=0)
-        if padding is not None:
-            self.text_area.config(padx=padding, pady=padding)
-            self.config["padding"] = padding
-            self.save_config()
-
-    def toggle_cursor_visibility(self):
-        if self.text_area["cursor"] in ["", "xterm"]:
-            self.text_area.config(cursor="none")
-        else:
-            self.text_area.config(cursor="xterm")
 
     def align_left(self):
         self.text_area.tag_configure("left", justify="left")
@@ -566,6 +491,77 @@ class ZenEdit:
             with open(self.auto_save_file, "w") as file:
                 file.write(self.text_area.get(1.0, tk.END))
         self.root.after(self.auto_save_interval, self.auto_save)  # Schedule next autosave
+#Settings
+    def change_root_bg_color(self):
+        color = colorchooser.askcolor(title="Choose root background color")[1]
+        if color:
+            self.config["root_bg_color"] = color
+            self.root.config(bg=color)
+            self.save_config()
+    
+    def change_bg_color(self):
+        color = colorchooser.askcolor(title="Choose background color")[1]
+        if color:
+            self.config["bg_color"] = color
+            self.text_area.config(bg=color)
+            self.frame.config(bg=color)
+            self.save_config()
+    
+    def change_cursor_color(self):
+        color = colorchooser.askcolor(title="Choose cursor color")[1]
+        if color:
+            self.config["cursor_color"] = color
+            self.text_area.config(insertbackground=color)
+            self.save_config()
+    
+    def change_selection_color(self):
+        color = colorchooser.askcolor(title="Choose selection color")[1]
+        if color:
+            self.config["selection_color"] = color
+            self.text_area.config(selectbackground=color)
+            self.save_config()
+    
+    def change_fg_color(self):
+        color = colorchooser.askcolor(title="Choose text color")[1]
+        if color:
+            self.config["fg_color"] = color
+            self.text_area.config(fg=color)
+            self.save_config()
+            
+    def change_selection_text_color(self):
+        color = colorchooser.askcolor(title="Choose selection text color")[1]
+        if color:
+            self.config["selection_text_color"] = color
+            self.text_area.config(selectforeground=color)
+            self.save_config()
+
+    def change_border_color(self):
+        color = colorchooser.askcolor(title="Choose border color")[1]
+        if color:
+            self.config["border_color"] = color
+            self.text_area.config(highlightbackground=color, highlightcolor=color)
+            self.save_config()
+    
+    def set_border_thickness(self):
+        thickness = simpledialog.askinteger(
+            "Set Border Thickness",
+            "Enter border thickness:",
+            initialvalue=self.config.get(
+                "border_thickness", 1
+            ),  # Default thickness is 1
+        )
+        if thickness is not None:  # Check if the user entered a value
+            self.config["border_thickness"] = thickness
+            self.text_area.config(highlightthickness=thickness)
+            self.save_config()
+
+    
+    def set_cursor_thickness(self):
+        thickness = simpledialog.askinteger("Cursor Thickness", "Enter cursor thickness:", initialvalue=self.config.get("insertwidth", 2))
+        if thickness is not None:
+            self.config["insertwidth"] = thickness
+            self.text_area.config(insertwidth=thickness)
+            self.save_config()
 
     def toggle_auto_save(self):
         # This method will be called whenever the autosave menu item is toggled
@@ -573,11 +569,11 @@ class ZenEdit:
             messagebox.showinfo("Autosave Enabled", "Autosave feature has been enabled.")
         else:
             messagebox.showinfo("Autosave Disabled", "Autosave feature has been disabled.")
-
+#About
     def show_about(self):
         about_text = "ZenEdit v2.0\nA simple text editor built with Tkinter."
         messagebox.showinfo("About ZenEdit", about_text)
-
+#shortcuts
     def undo_text(self, event=None):
         try:
             self.text_area.edit_undo()
