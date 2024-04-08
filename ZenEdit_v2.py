@@ -32,9 +32,7 @@ class ZenEdit:
         self.root.bind("<F11>", self.toggleFullScreen)
         self.root.bind("<F12>", lambda event: self.save_file())
         self.menu = tk.Menu(root)
-        self.default_menu_bg = self.menu.cget('bg')
-        self.default_menu_fg = self.menu.cget('fg')
-
+        
         self.file_menu = tk.Menu(self.menu, tearoff=0)
         self.file_menu.add_command(label="New (F9)", command=self.new_file)
         self.file_menu.add_command(label="Open (F10)", command=self.open_file)
@@ -493,18 +491,34 @@ class ZenEdit:
         self.root.after(self.auto_save_interval, self.auto_save) 
 #Settings
     def toggle_change_color_menu(self):
+        # Save the default colors if not already saved
+        if not hasattr(self, 'default_bg'):
+            self.default_bg = self.menu.cget('bg')
+        if not hasattr(self, 'default_fg'):
+            self.default_fg = self.menu.cget('fg')
+        if not hasattr(self, 'default_active_bg'):
+            self.default_active_bg = self.menu.cget('activebackground')
+        if not hasattr(self, 'default_active_fg'):
+            self.default_active_fg = self.menu.cget('activeforeground')
+
         if self.change_color_menu_enabled.get():
+            # Choose colors through color chooser
             fg_color = colorchooser.askcolor(title="Choose text color")[1]
             bg_color = colorchooser.askcolor(title="Choose background color")[1]
+            active_fg_color = colorchooser.askcolor(title="Choose active text color")[1]
+            active_bg_color = colorchooser.askcolor(title="Choose active background color")[1]
         else:
             # Use the saved default colors
-            fg_color = self.default_menu_fg
-            bg_color = self.default_menu_bg
+            fg_color = self.default_fg
+            bg_color = self.default_bg
+            active_fg_color = self.default_active_fg
+            active_bg_color = self.default_active_bg
 
         # Apply the chosen colors to the main menu and its submenus
-        self.menu.config(bg=bg_color, fg=fg_color)
+        self.menu.config(bg=bg_color, fg=fg_color, activebackground=active_bg_color, activeforeground=active_fg_color)
         for menu_item in [self.file_menu, self.edit_menu, self.view_menu, self.format_menu, self.settings_menu]:
-            menu_item.config(bg=bg_color, fg=fg_color)
+            menu_item.config(bg=bg_color, fg=fg_color, activebackground=active_bg_color, activeforeground=active_fg_color)
+
 
     def change_root_bg_color(self):
         color = colorchooser.askcolor(title="Choose root background color")[1]
