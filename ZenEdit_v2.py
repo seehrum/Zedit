@@ -154,6 +154,8 @@ class ZenEdit:
         self.auto_save_interval = 5000
         self.auto_save()
 
+        self.text_area.bind("<Control-s>", self.save_file)
+        self.text_area.bind("<Control-S>", self.save_file)
         self.text_area.bind("<Control-z>", self.undo_text)
         self.text_area.bind("<Control-Z>", self.redo_text)
         self.text_area.bind("<Control-y>", self.redo_text)
@@ -217,7 +219,7 @@ class ZenEdit:
         with open(filepath, "r") as file:
             self.text_area.insert(tk.END, file.read())
 
-    def save_file(self):
+    def save_file(self, event=None):
         filepath = filedialog.asksaveasfilename(
             defaultextension=".txt",
             filetypes=[("Text Files", "*.txt"), ("All Files", "*.*")],
