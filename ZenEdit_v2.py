@@ -6,6 +6,7 @@ from tkinter import (
     simpledialog,
     Toplevel,
     Listbox,
+    PhotoImage,
     messagebox,
 )
 import json
@@ -74,6 +75,7 @@ class ZenEdit:
         self.format_menu.add_command(label="Align Right", command=self.align_right)
 
         self.settings_menu = tk.Menu(self.menu, tearoff=0)
+        self.settings_menu.add_command(label="Load Background Image", command=self.load_background_image)
         self.settings_menu.add_checkbutton(label="Dark Mode Menu", onvalue=True, offvalue=False, variable=self.darkmode_menu_enabled, command=self.toggle_darkmode_menu)
         self.settings_menu.add_command(label="Change Root Background Color", command=self.change_root_bg_color)
         self.settings_menu.add_command(label="Change Background Color", command=self.change_bg_color)
@@ -537,6 +539,30 @@ class ZenEdit:
                 file.write(self.text_area.get(1.0, tk.END))
         self.root.after(self.auto_save_interval, self.auto_save) 
 #Settings
+    def load_background_image(self):
+        # Ask the user to select an image file
+        image_path = filedialog.askopenfilename(
+            filetypes=[
+                ("PNG Files", "*.png"),
+                ("JPEG Files", "*.jpg;*.jpeg"),
+                ("GIF Files", "*.gif"),
+                ("All Files", "*.*")  # This line ensures that all files can be seen in the dialog.
+            ]
+        )
+        if not image_path:  # No file selected
+            return
+
+        # Load the image and update the background label
+        self.bg_image = tk.PhotoImage(file=image_path)
+        if hasattr(self, 'bg_label'):
+            self.bg_label.configure(image=self.bg_image)
+        else:
+            self.bg_label = tk.Label(self.root, image=self.bg_image)
+            self.bg_label.place(x=0, y=0, relwidth=1, relheight=1)
+
+        # Lower the background label to send it behind all other widgets
+        self.bg_label.lower()
+
     def toggle_darkmode_menu(self):
         if not hasattr(self, 'default_bg'):
             self.default_bg = self.menu.cget('bg')
