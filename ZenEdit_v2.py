@@ -361,20 +361,20 @@ class ZenEdit:
         )
 
     def set_text_area_size(self):
-        width = simpledialog.askinteger(
-            "Text Area Width",
-            "Enter width:",
-            initialvalue=self.config.get("text_width", 80),
-        )
-        height = simpledialog.askinteger(
-            "Text Area Height",
-            "Enter height:",
-            initialvalue=self.config.get("text_height", 25),
-        )
-        if width and height:
-            self.config["text_width"] = width
-            self.config["text_height"] = height
-            self.text_area.config(width=width, height=height)
+        # Ask the user for dimensions in pixels
+        dimensions = simpledialog.askstring("Text Area Size", "Enter size in pixels (width x height):")
+        if dimensions and 'x' in dimensions:
+            pixel_width, pixel_height = map(int, dimensions.split('x'))
+
+            # Set the frame size directly in pixels
+            self.frame.config(width=pixel_width, height=pixel_height)
+
+            # Use pack_propagate(False) to prevent the frame from resizing to fit its content
+            self.frame.pack_propagate(False)
+
+            # Update the configuration
+            self.config["text_width"] = pixel_width
+            self.config["text_height"] = pixel_height
             self.save_config()
     
     def set_padding(self):
