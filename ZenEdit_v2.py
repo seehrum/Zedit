@@ -355,7 +355,7 @@ class ZenEdit:
         self.text_area.insert('1.0', '\n'.join(stripped_lines))
 
     def show_word_char_count(self):
-        text_content = self.text_area.get(1.0, "end-1c")  # Get content of text_area
+        text_content = self.text_area.get(1.0, "end-1c")
         words = len(text_content.split())
         characters = len(text_content)
         messagebox.showinfo(
@@ -363,25 +363,14 @@ class ZenEdit:
         )
 
     def set_text_area_size(self):
-        # Get the current dimensions of the frame in pixels
         current_width = self.frame.winfo_width()
         current_height = self.frame.winfo_height()
-
-        # Format the current dimensions as a string
         current_dimensions = f"{current_width}x{current_height}"
-
-        # Ask the user for dimensions in pixels, showing the current dimensions as the default
         dimensions = simpledialog.askstring("Text Area Size", "Enter size in pixels (width x height):", initialvalue=current_dimensions)
         if dimensions and 'x' in dimensions:
             pixel_width, pixel_height = map(int, dimensions.split('x'))
-
-            # Set the frame size directly in pixels
             self.frame.config(width=pixel_width, height=pixel_height)
-
-            # Use pack_propagate(False) to prevent the frame from resizing to fit its content
             self.frame.pack_propagate(False)
-
-            # Update the configuration
             self.config["text_width"] = pixel_width
             self.config["text_height"] = pixel_height
             self.save_config()
@@ -429,25 +418,19 @@ class ZenEdit:
         font_window = tk.Toplevel(self.root)
         font_window.title("Choose Font")
         font_window.geometry("500x310")  # Set a fixed size for the font window
-
         font_listbox = tk.Listbox(font_window, width=30, height=10)
         font_listbox.pack(side="left", fill="y")
-
         scrollbar = tk.Scrollbar(font_window, command=font_listbox.yview)
         scrollbar.pack(side="left", fill="y")
         font_listbox.config(yscrollcommand=scrollbar.set)
-
         preview_text = "The quick brown fox jumps over the lazy dog"
         preview_label = tk.Label(font_window, text=preview_text)
         preview_label.pack(pady=10)
-
         is_bold = tk.BooleanVar(value=self.config.get("font_bold", False))
         is_italic = tk.BooleanVar(value=self.config.get("font_italic", False))
         font_size = tk.IntVar(value=self.config.get("font_size", 12))
-
         tk.Checkbutton(font_window, text="Bold", variable=is_bold).pack()
         tk.Checkbutton(font_window, text="Italic", variable=is_italic).pack()
-
         size_entry = tk.Spinbox(font_window, from_=8, to=72, textvariable=font_size, wrap=True)
         size_entry.pack()
 
@@ -477,15 +460,12 @@ class ZenEdit:
             self.text_area.config(font=self.current_font)
             self.save_config()
             font_window.destroy()
-
         font_listbox.bind("<<ListboxSelect>>", update_preview)
         is_bold.trace('w', update_preview)
         is_italic.trace('w', update_preview)
         font_size.trace('w', update_preview)
-
         for fnt in font.families():
             font_listbox.insert(tk.END, fnt)
-
         apply_button = tk.Button(font_window, text="Apply", command=apply_font)
         apply_button.pack(pady=10)
 
@@ -566,7 +546,6 @@ class ZenEdit:
             self.default_active_bg = self.menu.cget('activebackground')
         if not hasattr(self, 'default_active_fg'):
             self.default_active_fg = self.menu.cget('activeforeground')
-
         if self.darkmode_menu_enabled.get():
             fg_color = '#e4e6eb'
             bg_color = '#3a3b3c'
@@ -578,7 +557,6 @@ class ZenEdit:
             bg_color = self.default_bg
             active_fg_color = self.default_active_fg
             active_bg_color = self.default_active_bg
-            
         self.menu.config(bg=bg_color, fg=fg_color, activebackground=active_bg_color, activeforeground=active_fg_color)
         for menu_item in [self.file_menu, self.edit_menu, self.view_menu, self.format_menu, self.settings_menu]:
             menu_item.config(bg=bg_color, fg=fg_color, activebackground=active_bg_color, activeforeground=active_fg_color)
