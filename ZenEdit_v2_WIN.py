@@ -279,18 +279,6 @@ class ZenEdit:
     def select_all(self, event=None):
         self.text_area.tag_add("sel", "1.0", "end")
         return "break"
-    
-    def search_text(self, event=None):
-        search_window = tk.Toplevel(self.root)
-        search_window.title("Search")
-        tk.Label(search_window, text="Find:").pack(side="left")
-        search_entry = tk.Entry(search_window)
-        search_entry.pack(side="left", fill="x", expand=True)
-        search_entry.focus_set()
-        case_sensitive = tk.BooleanVar(value=False)
-        tk.Checkbutton(search_window, text="Case Sensitive", variable=case_sensitive).pack(side="left")
-
-        self.last_search_start = "1.0"
 
     def search_text(self, event=None):
         search_window = tk.Toplevel(self.root)
@@ -306,12 +294,11 @@ class ZenEdit:
         self.last_search_query = ""
 
         def do_search(next=False):
-            nonlocal search_entry
             search_query = search_entry.get()
             if not search_query:
                 return
 
-            if search_query != self.last_search_query:
+            if search_query != self.last_search_query or not next:
                 self.last_search_start = "1.0"
                 self.last_search_query = search_query
 
@@ -320,7 +307,7 @@ class ZenEdit:
             search_idx = self.text_area.search(search_query, start_idx, stopindex=tk.END, **search_args)
 
             if not search_idx:
-                if next and self.last_search_start != "1.0":
+                if next:
                     # Restart search from beginning if 'next' was clicked and no result found
                     self.last_search_start = "1.0"
                     search_idx = self.text_area.search(search_query, "1.0", stopindex=tk.END, **search_args)
@@ -334,13 +321,15 @@ class ZenEdit:
             self.text_area.mark_set(tk.INSERT, end_idx)
             self.text_area.see(search_idx)
             self.last_search_start = f"{end_idx}"
+            self.root.update_idletasks()  # Force the interface to update
 
         tk.Button(search_window, text="Find", command=do_search).pack(side="left")
         tk.Button(search_window, text="Next", command=lambda: do_search(next=True)).pack(side="left")
         tk.Button(search_window, text="Close", command=search_window.destroy).pack(side="left")
         search_entry.bind("<Return>", lambda event: do_search())
         search_entry.bind("<Shift-Return>", lambda event: do_search(next=True))
-    
+
+
     def replace_text(self, event=None):
         search_query = simpledialog.askstring("Replace", "Find what:")
         if not search_query:
