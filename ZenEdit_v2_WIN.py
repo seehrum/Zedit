@@ -310,14 +310,15 @@ class ZenEdit:
                 self.text_area.mark_set(tk.INSERT, end_idx)
                 self.text_area.see(search_idx)
                 self.text_area.focus_set()  # Ensure text area has focus to show selection
+                search_window.focus_set()  # Keep the search window focused
             else:
                 messagebox.showinfo("Search", "Text not found.")
+                search_window.focus_set()  # Keep the search window focused
 
         tk.Button(search_window, text="Find", command=do_search).pack(side="left")
         tk.Button(search_window, text="Next", command=lambda: do_search(next=True)).pack(side="left")
         tk.Button(search_window, text="Close", command=search_window.destroy).pack(side="left")
         search_entry.bind("<Return>", lambda event: do_search(next=True))
-
 
     def replace_text(self, event=None):
         search_query = simpledialog.askstring("Replace", "Find what:")
