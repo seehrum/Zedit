@@ -29,6 +29,8 @@ class ZenEdit:
         self.root.bind("<F5>", lambda event: self.toggle_line_numbers())
         self.root.bind("<F6>", lambda event: self.show_word_char_count())
         self.root.bind("<F7>", self.search_text)
+        self.root.bind("<Control-f>", lambda event: self.search_text())
+        self.root.bind("<Control-F>", lambda event: self.search_text())
         self.root.bind("<F8>", self.replace_text)
         self.root.bind("<F9>", lambda event: self.new_file())
         self.root.bind("<F10>", lambda event: self.open_file())
@@ -291,7 +293,10 @@ class ZenEdit:
         tk.Checkbutton(search_window, text="Case Sensitive", variable=case_sensitive).pack(side="left")
 
         highlight_tag = "search_highlight"
-        self.text_area.tag_configure(highlight_tag, background="yellow", foreground="black")
+        # Use user-selected colors for highlighting
+        highlight_background = self.text_area.cget("selectbackground")
+        highlight_foreground = self.text_area.cget("selectforeground")
+        self.text_area.tag_configure(highlight_tag, background=highlight_background, foreground=highlight_foreground)
 
         def do_search(next=False):
             search_query = search_entry.get()
