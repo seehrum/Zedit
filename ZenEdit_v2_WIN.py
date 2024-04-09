@@ -292,23 +292,48 @@ class ZenEdit:
 
         self.last_search_start = "1.0"
 
+    def search_text(self, event=None):
+        search_window = tk.Toplevel(self.root)
+        search_window.title("Search")
+        tk.Label(search_window, text="Find:").pack(side="left")
+        search_entry = tk.Entry(search_window)
+        search_entry.pack(side="left", fill="x", expand=True)
+        search_entry.focus_set()
+        case_sensitive = tk.BooleanVar(value=False)
+        tk.Checkbutton(search_window, text="Case Sensitive", variable=case_sensitive).pack(side="left")
+
+        self.last_search_start = "1.0"
+        self.last_search_query = ""
+
         def do_search(next=False):
             nonlocal search_entry
             search_query = search_entry.get()
             if not search_query:
                 return
+
+            if search_query != self.last_search_query:
+                self.last_search_start = "1.0"
+                self.last_search_query = search_query
+
             start_idx = self.last_search_start if next else "1.0"
-            search_args = {'nocase': not case_sensitive.get()}
+            search_args = {'nocase': not case_sensitive.get(), 'regexp': False}
             search_idx = self.text_area.search(search_query, start_idx, stopindex=tk.END, **search_args)
+
             if not search_idx:
-                messagebox.showinfo("Search", "Text not found.")
-                return
+                if next and self.last_search_start != "1.0":
+                    # Restart search from beginning if 'next' was clicked and no result found
+                    self.last_search_start = "1.0"
+                    search_idx = self.text_area.search(search_query, "1.0", stopindex=tk.END, **search_args)
+                    if not search_idx:
+                        messagebox.showinfo("Search", "Text not found.")
+                        return
+
             end_idx = f"{search_idx}+{len(search_query)}c"
             self.text_area.tag_remove(tk.SEL, "1.0", tk.END)
             self.text_area.tag_add(tk.SEL, search_idx, end_idx)
             self.text_area.mark_set(tk.INSERT, end_idx)
             self.text_area.see(search_idx)
-            self.last_search_start = end_idx  # Update the last search start position for the next search
+            self.last_search_start = f"{end_idx}"
 
         tk.Button(search_window, text="Find", command=do_search).pack(side="left")
         tk.Button(search_window, text="Next", command=lambda: do_search(next=True)).pack(side="left")
