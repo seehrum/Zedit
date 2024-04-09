@@ -329,6 +329,8 @@ class ZenEdit:
                 self.text_area.see(self.last_search_start)
             search_window.destroy()
 
+        search_window.protocol("WM_DELETE_WINDOW", close_search)
+
         tk.Button(search_window, text="Find", command=do_search).pack(side="left")
         tk.Button(search_window, text="Next", command=lambda: do_search(next=True)).pack(side="left")
         tk.Button(search_window, text="Close", command=close_search).pack(side="left")
