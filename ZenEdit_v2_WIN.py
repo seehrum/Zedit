@@ -290,6 +290,9 @@ class ZenEdit:
         case_sensitive = tk.BooleanVar(value=False)
         tk.Checkbutton(search_window, text="Case Sensitive", variable=case_sensitive).pack(side="left")
 
+        highlight_tag = "search_highlight"
+        self.text_area.tag_configure(highlight_tag, background="yellow", foreground="black")
+
         def do_search(next=False):
             search_query = search_entry.get()
             if not search_query:
@@ -297,6 +300,8 @@ class ZenEdit:
 
             start_idx = '1.0' if not next else self.text_area.index(tk.INSERT) + '+1c'
             search_args = {'nocase': not case_sensitive.get(), 'regexp': False}
+            self.text_area.tag_remove(highlight_tag, "1.0", tk.END)  # Clear previous highlights
+
             search_idx = self.text_area.search(search_query, start_idx, stopindex=tk.END, **search_args)
 
             if not search_idx and next:
@@ -305,19 +310,15 @@ class ZenEdit:
 
             if search_idx:
                 end_idx = f"{search_idx}+{len(search_query)}c"
-                self.text_area.tag_remove(tk.SEL, "1.0", tk.END)
-                self.text_area.tag_add(tk.SEL, search_idx, end_idx)
+                self.text_area.tag_add(highlight_tag, search_idx, end_idx)
                 self.text_area.mark_set(tk.INSERT, end_idx)
                 self.text_area.see(search_idx)
-                self.text_area.focus_set()  # Ensure text area has focus to show selection
-                search_window.focus_set()  # Keep the search window focused
             else:
                 messagebox.showinfo("Search", "Text not found.")
-                search_window.focus_set()  # Keep the search window focused
 
         tk.Button(search_window, text="Find", command=do_search).pack(side="left")
         tk.Button(search_window, text="Next", command=lambda: do_search(next=True)).pack(side="left")
-        tk.Button(search_window, text="Close", command=search_window.destroy).pack(side="left")
+        tk.Button(search_window, text="Close", command=lambda: [self.text_area.tag_remove(highlight_tag, "1.0", tk.END), search_window.destroy()]).pack(side="left")
         search_entry.bind("<Return>", lambda event: do_search(next=True))
 
     def replace_text(self, event=None):
