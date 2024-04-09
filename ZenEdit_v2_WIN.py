@@ -578,29 +578,32 @@ class ZenEdit:
         self.root.after(self.auto_save_interval, self.auto_save) 
 #Settings
     def toggle_darkmode_menu(self):
-            if not hasattr(self, 'default_bg'):
-                self.default_bg = self.menu.cget('bg')
-            if not hasattr(self, 'default_fg'):
-                self.default_fg = self.menu.cget('fg')
-            if not hasattr(self, 'default_active_bg'):
-                self.default_active_bg = self.menu.cget('activebackground')
-            if not hasattr(self, 'default_active_fg'):
-                self.default_active_fg = self.menu.cget('activeforeground')
-            if self.darkmode_menu_enabled.get():
-                fg_color = '#e4e6eb'
-                bg_color = '#3a3b3c'
-                active_fg_color = '#3a3b3c'
-                active_bg_color = '#e4e6eb'
-            else:
-                # Use the saved default colors
-                fg_color = self.default_fg
-                bg_color = self.default_bg
-                active_fg_color = self.default_active_fg
-                active_bg_color = self.default_active_bg
-            self.menu.config(bg=bg_color, fg=fg_color, activebackground=active_bg_color, activeforeground=active_fg_color)
-            for menu_item in [self.file_menu, self.edit_menu, self.view_menu, self.format_menu, self.settings_menu]:
-                menu_item.config(bg=bg_color, fg=fg_color, activebackground=active_bg_color, activeforeground=active_fg_color)
-    
+        if not hasattr(self, 'default_bg'):
+            self.default_bg = self.file_menu.cget('bg')
+            self.default_fg = self.file_menu.cget('fg')
+            self.default_active_bg = self.file_menu.cget('activebackground')
+            self.default_active_fg = self.file_menu.cget('activeforeground')
+
+        if self.darkmode_menu_enabled.get():
+            # Cores para o modo escuro
+            bg_color = '#3a3b3c'
+            fg_color = '#e4e6eb'
+            active_bg_color = '#e4e6eb'
+            active_fg_color = '#3a3b3c'
+        else:
+            # Reverter para as cores padrão
+            bg_color = self.default_bg
+            fg_color = self.default_fg
+            active_bg_color = self.default_active_bg
+            active_fg_color = self.default_active_fg
+
+        self.menu.config(bg=bg_color, fg=fg_color)
+        for menu_item in [self.file_menu, self.edit_menu, self.view_menu, self.format_menu, self.settings_menu]:
+            menu_item.config(bg=bg_color, fg=fg_color, activebackground=active_bg_color, activeforeground=active_fg_color)
+
+        self.root.config(menu=self.menu)
+        self.root.update_idletasks()
+
     def toggle_root_background_image(self):
         if not self.root_bg_image_visible:
             image_path = filedialog.askopenfilename(
