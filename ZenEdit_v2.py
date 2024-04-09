@@ -23,7 +23,7 @@ class ZenEdit:
         self.darkmode_menu_enabled = tk.BooleanVar(value=False)
         self.auto_save_enabled = tk.BooleanVar(value=True)
         self.fullScreenState = False
-        self.bg_image_visible = False
+        self.root_bg_image_visible = False
 
         self.root.bind("<F2>", lambda event: self.quit())
         self.root.bind("<F5>", lambda event: self.toggle_line_numbers())
@@ -85,7 +85,7 @@ class ZenEdit:
         self.settings_menu = tk.Menu(self.menu, tearoff=0)
         self.settings_menu.add_checkbutton(label="Dark Mode Menu", onvalue=True, offvalue=False, variable=self.darkmode_menu_enabled, command=self.toggle_darkmode_menu)
         self.settings_menu.add_separator()
-        self.settings_menu.add_command(label="Toggle Background Image", command=self.load_background_image)
+        self.settings_menu.add_command(label="Toggle Root Background Image", command=self.toggle_root_background_image)
         self.settings_menu.add_command(label="Change Root Background Color", command=self.change_root_bg_color)
         self.settings_menu.add_command(label="Change Background Color", command=self.change_bg_color)
         self.settings_menu.add_command(label="Change Text Color", command=self.change_fg_color)
@@ -574,8 +574,8 @@ class ZenEdit:
             for menu_item in [self.file_menu, self.edit_menu, self.view_menu, self.format_menu, self.settings_menu]:
                 menu_item.config(bg=bg_color, fg=fg_color, activebackground=active_bg_color, activeforeground=active_fg_color)
     
-    def load_background_image(self):
-        if not self.bg_image_visible:
+    def toggle_root_background_image(self):
+        if not self.root_bg_image_visible:
             image_path = filedialog.askopenfilename(
                 filetypes=[("PNG Files", "*.png"), ("GIF Files", "*.gif"), ("All Files", "*.*")]
             )
@@ -590,13 +590,13 @@ class ZenEdit:
                     self.bg_label = tk.Label(self.root, image=self.bg_image)
                     self.bg_label.place(relx=0.5, rely=0.5, anchor='center')
                 self.bg_label.lower()
-                self.bg_image_visible = True
+                self.root_bg_image_visible = True
             except tk.TclError:
                 messagebox.showerror("Error", "Unsupported image format. Please select a PNG or GIF file.")
         else:
             if hasattr(self, 'bg_label'):
                 self.bg_label.configure(image='')
-                self.bg_image_visible = False
+                self.root_bg_image_visible = False
 
 
     def change_root_bg_color(self):
