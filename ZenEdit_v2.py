@@ -47,7 +47,7 @@ class ZenEdit:
         self.edit_menu = tk.Menu(self.menu, tearoff=0)
         self.edit_menu.add_command(label="Undo (CTRL+Z)", command=self.undo_text)
         self.edit_menu.add_command(label="Redo (CTRL+Y)", command=self.redo_text)
-        self.edit_menu.add_command(label="Copy (CTRL+C)", command=self.undo_text)
+        self.edit_menu.add_command(label="Copy (CTRL+C)", command=self.copy_text)
         self.edit_menu.add_command(label="Cut (CTRL+X)", command=self.cut_text)
         self.edit_menu.add_command(label="Paste (CTRL+V)", command=self.paste_text)
         self.edit_menu.add_command(label="Select All (CTRL+A)", command=self.select_all)
