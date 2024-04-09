@@ -24,6 +24,8 @@ class ZenEdit:
         self.auto_save_enabled = tk.BooleanVar(value=True)
         self.fullScreenState = False
         self.bg_image_visible = False
+        self.text_bg_label = tk.Label(self.frame)
+        self.text_bg_label.place(x=0, y=0, relwidth=1, relheight=1)
 
         self.root.bind("<F2>", lambda event: self.quit())
         self.root.bind("<F5>", lambda event: self.toggle_line_numbers())
@@ -184,6 +186,7 @@ class ZenEdit:
         if hasattr(self, "text_area"):
             self.text_area.config(highlightbackground=self.config["border_color"])
             self.text_area.config(padx=self.config["padding"],pady=self.config["padding"])
+            self.load_background_image(self.config['bg_image_path'])
 #File
     def new_file(self):
         response = None
@@ -279,7 +282,7 @@ class ZenEdit:
     def select_all(self, event=None):
         self.text_area.tag_add("sel", "1.0", "end")
         return "break"
-    
+        
     def search_text(self, event=None):
         search_window = tk.Toplevel(self.root)
         search_window.title("Search")
@@ -313,7 +316,7 @@ class ZenEdit:
         tk.Button(search_window, text="Close", command=search_window.destroy).pack(side="left")
         search_entry.bind("<Return>", lambda event: do_search())
         search_entry.bind("<Shift-Return>", lambda event: do_search(next=True))
-    
+
     def replace_text(self, event=None):
         search_query = simpledialog.askstring("Replace", "Find what:")
         if not search_query:
@@ -481,9 +484,7 @@ class ZenEdit:
             font_listbox.insert(tk.END, fnt)
         apply_button = tk.Button(font_window, text="Apply", command=apply_font)
         apply_button.pack(pady=10)
-
         update_preview()  # Initial preview update
-
 
     def change_font_size(self):
         font_size = simpledialog.askinteger(
@@ -574,30 +575,27 @@ class ZenEdit:
             for menu_item in [self.file_menu, self.edit_menu, self.view_menu, self.format_menu, self.settings_menu]:
                 menu_item.config(bg=bg_color, fg=fg_color, activebackground=active_bg_color, activeforeground=active_fg_color)
     
-    def load_background_image(self):
-        if not self.bg_image_visible:
+    def load_background_image(self, path=None):
+        image_path = path
+        if image_path is None:
             image_path = filedialog.askopenfilename(
                 filetypes=[("PNG Files", "*.png"), ("GIF Files", "*.gif"), ("All Files", "*.*")]
             )
             if not image_path:
                 return
 
-            try:
-                self.bg_image = tk.PhotoImage(file=image_path)
-                if hasattr(self, 'bg_label'):
-                    self.bg_label.configure(image=self.bg_image)
-                else:
-                    self.bg_label = tk.Label(self.root, image=self.bg_image)
-                    self.bg_label.place(relx=0.5, rely=0.5, anchor='center')
-                self.bg_label.lower()
-                self.bg_image_visible = True
-            except tk.TclError:
-                messagebox.showerror("Error", "Unsupported image format. Please select a PNG or GIF file.")
-        else:
+        try:
+            self.bg_image = tk.PhotoImage(file=image_path)
             if hasattr(self, 'bg_label'):
-                self.bg_label.configure(image='')
-                self.bg_image_visible = False
-
+                self.bg_label.configure(image=self.bg_image)
+            else:
+                self.bg_label = tk.Label(self.root, image=self.bg_image)
+                self.bg_label.place(relx=0.5, rely=0.5, anchor='center')
+            self.bg_image_visible = True
+            self.config['bg_image_path'] = image_path
+            self.save_config()
+        except tk.TclError:
+            messagebox.showerror("Error", "Unsupported image format. Please select a PNG or GIF file.")
 
     def change_root_bg_color(self):
         color = colorchooser.askcolor(title="Choose root background color")[1]
