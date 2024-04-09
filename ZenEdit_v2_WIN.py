@@ -313,12 +313,25 @@ class ZenEdit:
                 self.text_area.tag_add(highlight_tag, search_idx, end_idx)
                 self.text_area.mark_set(tk.INSERT, end_idx)
                 self.text_area.see(search_idx)
+
+                # Keep track of the last search position for potential selection later
+                self.last_search_start = search_idx
+                self.last_search_end = end_idx
             else:
                 messagebox.showinfo("Search", "Text not found.")
 
+        def close_search():
+            # Remove highlight and select the last found word when closing the search window
+            self.text_area.tag_remove(highlight_tag, "1.0", tk.END)
+            if hasattr(self, 'last_search_start') and hasattr(self, 'last_search_end'):
+                self.text_area.tag_add(tk.SEL, self.last_search_start, self.last_search_end)
+                self.text_area.mark_set(tk.INSERT, self.last_search_end)
+                self.text_area.see(self.last_search_start)
+            search_window.destroy()
+
         tk.Button(search_window, text="Find", command=do_search).pack(side="left")
         tk.Button(search_window, text="Next", command=lambda: do_search(next=True)).pack(side="left")
-        tk.Button(search_window, text="Close", command=lambda: [self.text_area.tag_remove(highlight_tag, "1.0", tk.END), search_window.destroy()]).pack(side="left")
+        tk.Button(search_window, text="Close", command=close_search).pack(side="left")
         search_entry.bind("<Return>", lambda event: do_search(next=True))
 
     def replace_text(self, event=None):
