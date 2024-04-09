@@ -23,6 +23,7 @@ class ZenEdit:
         self.darkmode_menu_enabled = tk.BooleanVar(value=False)
         self.auto_save_enabled = tk.BooleanVar(value=True)
         self.fullScreenState = False
+        self.bg_image_visible = False
 
         self.root.bind("<F2>", lambda event: self.quit())
         self.root.bind("<F5>", lambda event: self.toggle_line_numbers())
@@ -76,11 +77,11 @@ class ZenEdit:
 
         self.settings_menu = tk.Menu(self.menu, tearoff=0)
         self.settings_menu.add_checkbutton(label="Dark Mode Menu", onvalue=True, offvalue=False, variable=self.darkmode_menu_enabled, command=self.toggle_darkmode_menu)
-        self.settings_menu.add_command(label="Load Background Image", command=self.load_background_image)
+        self.settings_menu.add_command(label="Toggle Background Image", command=self.load_background_image)
         self.settings_menu.add_command(label="Change Root Background Color", command=self.change_root_bg_color)
         self.settings_menu.add_command(label="Change Background Color", command=self.change_bg_color)
-        self.settings_menu.add_command(label="Change Caret Cursor Color", command=self.change_caret_cursor_color)
         self.settings_menu.add_command(label="Change Text Color", command=self.change_fg_color)
+        self.settings_menu.add_command(label="Change Caret Cursor Color", command=self.change_caret_cursor_color)
         self.settings_menu.add_command(label="Change Selection Color", command=self.change_selection_color)
         self.settings_menu.add_command(label="Change Selection Text Color", command=self.change_selection_text_color,)
         self.settings_menu.add_command(label="Change Border Color", command=self.change_border_color)
@@ -564,31 +565,29 @@ class ZenEdit:
                 menu_item.config(bg=bg_color, fg=fg_color, activebackground=active_bg_color, activeforeground=active_fg_color)
     
     def load_background_image(self):
-        # Ask the user to select an image file
-        image_path = filedialog.askopenfilename(
-            filetypes=[
-                ("PNG Files", "*.png"),
-                ("GIF Files", "*.gif"),
-                ("All Files", "*.*")
-            ]
-        )
-        if not image_path:
-            return
+        if not self.bg_image_visible:
+            image_path = filedialog.askopenfilename(
+                filetypes=[("PNG Files", "*.png"), ("GIF Files", "*.gif"), ("All Files", "*.*")]
+            )
+            if not image_path:
+                return
 
-        try:
-            # Load the image and update the background label
-            self.bg_image = tk.PhotoImage(file=image_path)
+            try:
+                self.bg_image = tk.PhotoImage(file=image_path)
+                if hasattr(self, 'bg_label'):
+                    self.bg_label.configure(image=self.bg_image)
+                else:
+                    self.bg_label = tk.Label(self.root, image=self.bg_image)
+                    self.bg_label.place(relx=0.5, rely=0.5, anchor='center')
+                self.bg_label.lower()
+                self.bg_image_visible = True
+            except tk.TclError:
+                messagebox.showerror("Error", "Unsupported image format. Please select a PNG or GIF file.")
+        else:
             if hasattr(self, 'bg_label'):
-                self.bg_label.configure(image=self.bg_image)
-            else:
-                self.bg_label = tk.Label(self.root, image=self.bg_image)
-                # Center the label on the screen
-                self.bg_label.place(relx=0.5, rely=0.5, anchor='center')
-            self.bg_label.lower()
+                self.bg_label.configure(image='')
+                self.bg_image_visible = False
 
-        except tk.TclError:
-            # Show an error message if the image format is not supported
-            messagebox.showerror("Error", "Unsupported image format. Please select a PNG or GIF file.")
 
     def change_root_bg_color(self):
         color = colorchooser.askcolor(title="Choose root background color")[1]
@@ -604,6 +603,13 @@ class ZenEdit:
             self.text_area.config(bg=color)
             self.frame.config(bg=color)
             self.save_config()
+
+    def change_fg_color(self):
+        color = colorchooser.askcolor(title="Choose text color")[1]
+        if color:
+            self.config["fg_color"] = color
+            self.text_area.config(fg=color)
+            self.save_config()
     
     def change_caret_cursor_color(self):
         color = colorchooser.askcolor(title="Choose cursor color")[1]
@@ -617,13 +623,6 @@ class ZenEdit:
         if color:
             self.config["selection_color"] = color
             self.text_area.config(selectbackground=color)
-            self.save_config()
-    
-    def change_fg_color(self):
-        color = colorchooser.askcolor(title="Choose text color")[1]
-        if color:
-            self.config["fg_color"] = color
-            self.text_area.config(fg=color)
             self.save_config()
 
     def change_selection_text_color(self):
