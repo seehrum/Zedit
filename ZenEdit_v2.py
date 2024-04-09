@@ -29,6 +29,8 @@ class ZenEdit:
         self.root.bind("<F5>", lambda event: self.toggle_line_numbers())
         self.root.bind("<F6>", lambda event: self.show_word_char_count())
         self.root.bind("<F7>", self.search_text)
+        self.root.bind("<Control-f>", lambda event: self.search_text())
+        self.root.bind("<Control-F>", lambda event: self.search_text())
         self.root.bind("<F8>", self.replace_text)
         self.root.bind("<F9>", lambda event: self.new_file())
         self.root.bind("<F10>", lambda event: self.open_file())
