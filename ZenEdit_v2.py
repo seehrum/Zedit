@@ -279,7 +279,7 @@ class ZenEdit:
     def select_all(self, event=None):
         self.text_area.tag_add("sel", "1.0", "end")
         return "break"
-    
+
     def search_text(self, event=None):
         search_window = tk.Toplevel(self.root)
         search_window.title("Search")
@@ -290,30 +290,55 @@ class ZenEdit:
         case_sensitive = tk.BooleanVar(value=False)
         tk.Checkbutton(search_window, text="Case Sensitive", variable=case_sensitive).pack(side="left")
 
+        highlight_tag = "search_highlight"
+        # Use user-selected colors for highlighting
+        highlight_background = self.text_area.cget("selectbackground")
+        highlight_foreground = self.text_area.cget("selectforeground")
+        self.text_area.tag_configure(highlight_tag, background=highlight_background, foreground=highlight_foreground)
+
         def do_search(next=False):
             search_query = search_entry.get()
             if not search_query:
                 return
-            if next:
-                start_idx = self.text_area.index(tk.SEL_LAST + "+1c")
+
+            start_idx = '1.0' if not next else self.text_area.index(tk.INSERT) + '+1c'
+            search_args = {'nocase': not case_sensitive.get(), 'regexp': False}
+            self.text_area.tag_remove(highlight_tag, "1.0", tk.END)  # Clear previous highlights
+
+            search_idx = self.text_area.search(search_query, start_idx, stopindex=tk.END, **search_args)
+
+            if not search_idx and next:
+                # Restart search from beginning if 'next' was clicked and no result found
+                search_idx = self.text_area.search(search_query, "1.0", stopindex=tk.END, **search_args)
+
+            if search_idx:
+                end_idx = f"{search_idx}+{len(search_query)}c"
+                self.text_area.tag_add(highlight_tag, search_idx, end_idx)
+                self.text_area.mark_set(tk.INSERT, end_idx)
+                self.text_area.see(search_idx)
+
+                # Keep track of the last search position for potential selection later
+                self.last_search_start = search_idx
+                self.last_search_end = end_idx
             else:
-                start_idx = "1.0"
-            search_args = {'nocase': not case_sensitive.get()}
-            search_idx = self.text_area.search(search_query, start_idx, **search_args)
-            if not search_idx:
                 messagebox.showinfo("Search", "Text not found.")
-                return
-            end_idx = f"{search_idx}+{len(search_query)}c"
-            self.text_area.tag_remove(tk.SEL, "1.0", tk.END)
-            self.text_area.tag_add(tk.SEL, search_idx, end_idx)
-            self.text_area.mark_set(tk.INSERT, end_idx)
-            self.text_area.see(search_idx)
+
+        def close_search():
+            # Remove highlight and select the last found word when closing the search window
+            self.text_area.tag_remove(highlight_tag, "1.0", tk.END)
+            if hasattr(self, 'last_search_start') and hasattr(self, 'last_search_end'):
+                self.text_area.tag_add(tk.SEL, self.last_search_start, self.last_search_end)
+                self.text_area.mark_set(tk.INSERT, self.last_search_end)
+                self.text_area.see(self.last_search_start)
+            search_window.destroy()
+
+        search_window.protocol("WM_DELETE_WINDOW", close_search)
+
         tk.Button(search_window, text="Find", command=do_search).pack(side="left")
         tk.Button(search_window, text="Next", command=lambda: do_search(next=True)).pack(side="left")
-        tk.Button(search_window, text="Close", command=search_window.destroy).pack(side="left")
-        search_entry.bind("<Return>", lambda event: do_search())
-        search_entry.bind("<Shift-Return>", lambda event: do_search(next=True))
-    
+        tk.Button(search_window, text="Close", command=close_search).pack(side="left")
+        search_entry.bind("<Return>", lambda event: do_search(next=True))
+
     def replace_text(self, event=None):
         search_query = simpledialog.askstring("Replace", "Find what:")
         if not search_query:
