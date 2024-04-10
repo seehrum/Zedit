@@ -8,8 +8,11 @@ class ZenEdit:
         self.root = root
         self.root.geometry("800x495")
         self.root.title("ZenEdit")
-        self.auto_save_enabled = tk.BooleanVar(value=True)
         self.config_file = "editor_config.json"
+        self.auto_save_file = "default_autosave.txt"
+        self.auto_save_enabled = tk.BooleanVar(value=True)
+        self.auto_save_interval = 5000
+
         self.load_config()
         self.fullScreenState = False
         self.root_bg_image_visible = False
@@ -17,6 +20,8 @@ class ZenEdit:
         self.setup_bindings()
         self.create_menus()
         self.setup_ui()
+        
+        self.auto_save()
 
     def load_config(self):
         defaults = {
