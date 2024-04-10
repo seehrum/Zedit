@@ -370,7 +370,7 @@ class ZenEdit:
         def do_replace():
             search_query = find_entry.get()
             replacement = replace_entry.get()
-            if search_query and replacement is not None:  # Check both fields are filled
+            if search_query and replacement is not None:
                 all_text = self.text_area.get("1.0", tk.END)
                 count = 0
 
@@ -378,33 +378,34 @@ class ZenEdit:
                     count = all_text.count(search_query)
                     updated_text = all_text.replace(search_query, replacement)
                 else:
-                    # Lowercase everything for a case-insensitive count and then replace
                     lower_text = all_text.lower()
                     lower_query = search_query.lower()
                     count = lower_text.count(lower_query)
-
-                    # Perform case-insensitive replacement
-                    updated_text = ''
+                    
+                    updated_text = all_text[:0]  # Keep the text up to the first character for initialization
                     start = 0
                     while True:
                         idx = lower_text.find(lower_query, start)
-                        if idx == -1:  # No more occurrences
-                            updated_text += all_text[start:]  # Append the rest of the text
+                        if idx == -1:
+                            updated_text += all_text[start:]
                             break
-                        updated_text += all_text[start:idx] + replacement  # Replace this occurrence
+                        updated_text += all_text[start:idx] + replacement
                         start = idx + len(search_query)
 
                 self.text_area.delete("1.0", tk.END)
                 self.text_area.insert("1.0", updated_text)
-                messagebox.showinfo(
-                    "Replace",
-                    f"Replaced {count} occurrences of '{search_query}' with '{replacement}'.",
-                )
+                messagebox.showinfo("Replace", f"Replaced {count} occurrences of '{search_query}' with '{replacement}'.")
                 replace_window.destroy()
 
-        # Replace button
         replace_button = tk.Button(replace_window, text="Replace All", command=do_replace)
         replace_button.pack(side=tk.LEFT)
+
+        close_button = tk.Button(replace_window, text="Close", command=replace_window.destroy)
+        close_button.pack(side=tk.LEFT)
+
+        find_entry.focus_set()
+        replace_window.bind('<Return>', lambda e: do_replace())
+
 
         # Focus on the find entry
         find_entry.focus_set()
