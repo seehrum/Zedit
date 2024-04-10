@@ -20,17 +20,29 @@ class ZenEdit:
         self.setup_bindings()
         self.create_menus()
         self.setup_ui()
-        
+
         self.auto_save()
 
     def load_config(self):
         defaults = {
-            "root_bg_color": "#1e1e1e", "font_family": "Arial", "font_size": 16,
-            "font_bold": False, "font_italic": False, "bg_color": "#1e1e1e",
-            "fg_color": "#ffffff", "caret_cursor_color": "white", "selection_color": "#3399ff",
-            "selection_text_color": "#ffffff", "caret_cursor": False, "text_width": 800,
-            "text_height": 945, "line_spacing": 4, "border_thickness": 1, "border_color": "#ffffff",
-            "padding": 0
+        "root_bg_color": "#1e1e1e",
+        "font_family": "Arial",
+        "font_size": 16,
+        "font_bold": False,
+        "font_italic": False,
+        "bg_color": "#1e1e1e",
+        "fg_color": "#ffffff",
+        "caret_cursor_color": "white",
+        "selection_color": "#3399ff",
+        "selection_text_color": "#ffffff",
+        "caret_cursor": False,
+        "text_width": 800,
+        "text_height": 945,
+        "line_spacing": 4,
+        "border_thickness": 1,
+        "border_color": "#ffffff",
+        "padding": 0,
+        "insertwidth": 2
         }
 
         if os.path.isfile(self.config_file):
@@ -97,7 +109,7 @@ class ZenEdit:
         self.view_menu.add_command(label="Set Text Area Size", command=self.set_text_area_size)
         self.view_menu.add_command(label="Set Padding", command=self.set_padding)
         self.view_menu.add_separator()
-        self.view_menu.add_command(label="Toggle Border", command=self.toggle_border)
+        self.view_menu.add_command(label="Toggle Border", command=self.toggle_border_visibility)
         self.view_menu.add_command(label="Toggle Mouse Cursor Visibility", command=self.toggle_mouse_cursor_visibility)
         self.view_menu.add_command(label="Toggle Caret Cursor Visibility", command=self.toggle_caret_cursor_visibility)
         self.view_menu.add_command(label="Toggle Caret Cursor Blink", command=self.toggle_caret_cursor_blink)
@@ -116,7 +128,7 @@ class ZenEdit:
         self.settings_menu = tk.Menu(self.menu, tearoff=0)
         self.settings_menu.add_command(label="Toggle Root Background Image", command=self.toggle_root_background_image)
         self.settings_menu.add_command(label="Change Root Background Color", command=self.change_root_bg_color)
-        self.settings_menu.add_command(label="Change Background Color", command=self.change_text_area_bg_color)
+        self.settings_menu.add_command(label="Change Text Area Background Color", command=self.change_text_area_bg_color)
         self.settings_menu.add_command(label="Change Text Color", command=self.change_fg_color)
         self.settings_menu.add_command(label="Change Caret Cursor Color", command=self.change_caret_cursor_color)
         self.settings_menu.add_command(label="Change Selection Color", command=self.change_selection_color)
@@ -155,7 +167,7 @@ class ZenEdit:
             bg=self.config["bg_color"],
             fg=self.config["fg_color"],
             insertbackground=self.config["caret_cursor_color"],
-            insertwidth=4 if self.config["caret_cursor"] else 2,
+            insertwidth=self.config["insertwidth"],
             spacing3=self.config["line_spacing"],
             borderwidth=0,
             wrap=tk.WORD,
@@ -417,10 +429,17 @@ class ZenEdit:
                 self.config["padding"] = padding
                 self.save_config()
                 
-    def toggle_border(self):
+    def toggle_border_visibility(self):
         current_thickness = self.text_area.cget("highlightthickness")
-        new_thickness = 0 if current_thickness > 0 else 1
-        self.text_area.config(highlightthickness=new_thickness)
+        if current_thickness > 0:
+            # Save the current thickness before setting to 0
+            self.config['border_thickness'] = current_thickness
+            self.text_area.config(highlightthickness=0)
+        else:
+            # Restore the saved thickness
+            self.text_area.config(highlightthickness=self.config['border_thickness'])
+
+        self.save_config()
     
     def toggle_mouse_cursor_visibility(self):
         if self.text_area["cursor"] in ["", "xterm"]:
@@ -432,7 +451,7 @@ class ZenEdit:
         if self.text_area['insertwidth'] > 1:
             self.text_area.config(insertwidth=0)
         else:
-            self.text_area.config(insertwidth=1)
+            self.text_area.config(insertwidth=2)
 
     def toggle_caret_cursor_blink(self):
             if self.text_area['insertofftime'] == 0:
@@ -598,12 +617,12 @@ class ZenEdit:
                 self.save_config()
 
     def change_text_area_bg_color(self):
-            color = colorchooser.askcolor(title="Choose background color")[1]
-            if color:
-                self.config["bg_color"] = color
-                self.text_area.config(bg=color)
-                self.frame.config(bg=color)
-                self.save_config()
+        color = colorchooser.askcolor(title="Choose background color")[1]
+        if color:
+            self.config["bg_color"] = color
+            self.text_area.config(bg=color)
+            self.frame.config(bg=color)
+            self.save_config()
 
     def change_fg_color(self):
             color = colorchooser.askcolor(title="Choose text color")[1]
@@ -654,11 +673,11 @@ class ZenEdit:
                 self.save_config()
 
     def set_caret_cursor_thickness(self):
-            thickness = simpledialog.askinteger("Caret Cursor Thickness", "Enter caret cursor thickness:", initialvalue=self.config.get("insertwidth", 2))
-            if thickness is not None:
-                self.config["insertwidth"] = thickness
-                self.text_area.config(insertwidth=thickness)
-                self.save_config()
+        thickness = simpledialog.askinteger("Caret Cursor Thickness", "Enter caret cursor thickness:", initialvalue=self.config.get("insertwidth", 2))
+        if thickness is not None:
+            self.config["insertwidth"] = thickness
+            self.text_area.config(insertwidth=thickness)
+            self.save_config()
 
     def toggle_auto_save(self):
             # This method will be called whenever the autosave menu item is toggled
@@ -677,6 +696,7 @@ class ZenEdit:
 
     def show_about(self):
         messagebox.showinfo("About ZenEdit", "ZenEdit v2.0\nA simple text editor built with Tkinter.")
+    
     def toggle_text_blink(self, event=None):
         if hasattr(self, 'blink_id'):
             # Stop blinking if it's already happening
@@ -710,25 +730,20 @@ class ZenEdit:
         if not self.is_blinking:
             return
 
-        current_fg_color = self.text_area.tag_cget("blink", "foreground")
-        bg_color = self.config.get("bg_color", "#1e1e1e")  # Assume default background color
-        fg_color = self.config.get("fg_color", "#ffffff")  # Assume default foreground color
+        # Use the latest configuration for colors
+        bg_color = self.config["bg_color"]
+        fg_color = self.config["fg_color"]
 
-        new_color = bg_color if current_fg_color == fg_color else fg_color
-        self.text_area.tag_configure("blink", foreground=new_color)
+        current_fg_color = self.text_area.tag_cget("blink", "foreground")
+        new_color = fg_color if current_fg_color == bg_color else bg_color
+
+        self.text_area.tag_configure("blink", foreground=new_color, background=bg_color)
         self.text_area.tag_add("blink", "1.0", "end")
 
         self.blink_id = self.root.after(self.blink_speed, self.start_blinking)
-            
-    def toggle_menu_view(self):
-        if not self.fullScreenState:
-            if self.root.cget('menu'):
-                self.root.config(menu='')
-            else:
-                self.root.config(menu=self.menu)
 
     def save_config(self):
-        with open(self.config_file, "w") as file:
+        with open(self.config_file, 'w') as file:
             json.dump(self.config, file, indent=4)
 
 if __name__ == "__main__":
