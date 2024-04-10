@@ -55,8 +55,9 @@ class ZenEdit:
             self.config.setdefault(key, value)
 
     def setup_bindings(self):
-        self.root.bind("<F1>", self.toggle_text_blink)
+        self.root.bind("<F1>", lambda event: self.toggle_border_visibility())
         self.root.bind("<F2>", lambda event: self.quit())
+        self.root.bind("<F3>", self.toggle_text_blink)
         self.root.bind("<F4>", lambda event: self.toggle_menu_view())
         self.root.bind("<F5>", lambda event: self.toggle_line_numbers())
         self.root.bind("<F6>", lambda event: self.show_word_char_count())
@@ -109,12 +110,13 @@ class ZenEdit:
         self.view_menu.add_command(label="Set Text Area Size", command=self.set_text_area_size)
         self.view_menu.add_command(label="Set Padding", command=self.set_padding)
         self.view_menu.add_separator()
-        self.view_menu.add_command(label="Toggle Border Visibility", command=self.toggle_border_visibility)
+        self.view_menu.add_command(label="Toggle Border Visibility (F1)", command=self.toggle_border_visibility)
         self.view_menu.add_command(label="Toggle Mouse Cursor Visibility", command=self.toggle_mouse_cursor_visibility)
         self.view_menu.add_command(label="Toggle Caret Cursor Visibility", command=self.toggle_caret_cursor_visibility)
         self.view_menu.add_command(label="Toggle Caret Cursor Blink", command=self.toggle_caret_cursor_blink)
         self.view_menu.add_command(label="Set Caret Cursor Blink Speed", command=self.set_caret_cursor_blink_speed)
-
+        self.view_menu.add_command(label="Toggle Text Blink (F3)", command=self.toggle_text_blink)
+        
         self.format_menu = tk.Menu(self.menu, tearoff=0)
         self.format_menu.add_command(label="Change Font", command=self.change_font)
         self.format_menu.add_command(label="Change Font Size", command=self.change_font_size)
