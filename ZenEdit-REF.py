@@ -11,6 +11,7 @@ class ZenEdit:
         self.config_file = "editor_config.json"
         self.auto_save_file = "default_autosave.txt"
         self.auto_save_enabled = tk.BooleanVar(value=True)
+        self.auto_save_enabled.trace('w', lambda *args: self.update_config("auto_save_enabled", self.auto_save_enabled.get()))
         self.auto_save_interval = 5000
 
         self.load_config()
@@ -204,6 +205,10 @@ class ZenEdit:
         self.text_area.bind("<Control-C>", self.copy_text)
         self.text_area.bind("<Control-v>", self.paste_text)
         self.text_area.bind("<Control-V>", self.paste_text)
+
+    def update_config(self, key, value):
+        self.config[key] = value
+        self.save_config()
 
 #File
     def new_file(self):
