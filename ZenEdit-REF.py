@@ -468,21 +468,29 @@ class ZenEdit:
     def set_text_area_size(self):
         current_dimensions = f"{self.frame.winfo_width()}x{self.frame.winfo_height()}"
         dimensions = simpledialog.askstring("Text Area Size", "Enter size in pixels (width x height):", initialvalue=current_dimensions)
-        if dimensions and 'x' in dimensions:
-            pixel_width, pixel_height = map(int, dimensions.split('x'))
-            self.frame.config(width=pixel_width, height=pixel_height)
-            self.frame.pack_propagate(False)
-            self.text_area.config(width=pixel_width, height=pixel_height)
-            self.config["text_width"] = pixel_width
-            self.config["text_height"] = pixel_height
-            self.save_config()
+        if dimensions:
+            try:
+                pixel_width, pixel_height = map(int, dimensions.split('x'))
+                if pixel_width > 0 and pixel_height > 0:
+                    self.frame.config(width=pixel_width, height=pixel_height)
+                    self.frame.pack_propagate(False)
+                    self.text_area.config(width=pixel_width, height=pixel_height)
+                    self.config["text_width"] = pixel_width
+                    self.config["text_height"] = pixel_height
+                    self.save_config()
+                else:
+                    messagebox.showerror("Invalid Size", "Width and height must be positive integers.")
+            except ValueError:
+                messagebox.showerror("Invalid Input", "Please enter a valid size in the format width x height.")
 
     def set_padding(self):
-            padding = simpledialog.askinteger("Padding", "Enter padding size:", minvalue=0)
-            if padding is not None:
-                self.text_area.config(padx=padding, pady=padding)
-                self.config["padding"] = padding
-                self.save_config()
+        padding = simpledialog.askinteger("Padding", "Enter padding size:", minvalue=0)
+        if padding is not None and padding >= 0:
+            self.text_area.config(padx=padding, pady=padding)
+            self.config["padding"] = padding
+            self.save_config()
+        else:
+            messagebox.showerror("Invalid Padding", "Padding must be a non-negative integer.")
                 
     def toggle_border_visibility(self):
         current_thickness = self.text_area.cget("highlightthickness")
@@ -607,15 +615,18 @@ class ZenEdit:
                 self.save_config()
 
     def set_line_spacing(self):
-            spacing = simpledialog.askfloat(
-                "Line Spacing",
-                "Enter line spacing:",
-                initialvalue=self.config.get("line_spacing", 4),
-            )
-            if spacing:
-                self.config["line_spacing"] = spacing
-                self.text_area.config(spacing3=spacing)
-                self.save_config()
+        spacing = simpledialog.askfloat(
+            "Line Spacing",
+            "Enter line spacing:",
+            initialvalue=self.config.get("line_spacing", 4),
+        )
+        if spacing is not None and spacing > 0:
+            self.config["line_spacing"] = spacing
+            self.text_area.config(spacing3=spacing)
+            self.save_config()
+        else:
+            messagebox.showerror("Invalid Spacing", "Line spacing must be a positive number.")
+
 
     def align_left(self):
             self.text_area.tag_configure("left", justify="left")
@@ -725,24 +736,22 @@ class ZenEdit:
                 self.save_config()
 
     def set_border_thickness(self):
-            thickness = simpledialog.askinteger(
-                "Set Border Thickness",
-                "Enter border thickness:",
-                initialvalue=self.config.get(
-                    "border_thickness", 1
-                ),
-            )
-            if thickness is not None:  # Check if the user entered a value
-                self.config["border_thickness"] = thickness
-                self.text_area.config(highlightthickness=thickness)
-                self.save_config()
+        thickness = simpledialog.askinteger("Set Border Thickness", "Enter border thickness:", minvalue=0)
+        if thickness is not None and thickness >= 0:
+            self.config["border_thickness"] = thickness
+            self.text_area.config(highlightthickness=thickness)
+            self.save_config()
+        else:
+            messagebox.showerror("Invalid Thickness", "Border thickness must be a non-negative integer.")
 
     def set_caret_cursor_thickness(self):
-        thickness = simpledialog.askinteger("Caret Cursor Thickness", "Enter caret cursor thickness:", initialvalue=self.config.get("insertwidth", 2))
-        if thickness is not None:
+        thickness = simpledialog.askinteger("Caret Cursor Thickness", "Enter caret cursor thickness:", initialvalue=self.config.get("insertwidth", 2), minvalue=1)
+        if thickness is not None and thickness > 0:
             self.config["insertwidth"] = thickness
             self.text_area.config(insertwidth=thickness)
             self.save_config()
+        else:
+            messagebox.showerror("Invalid Thickness", "Caret cursor thickness must be a positive integer.")
 
     def toggle_auto_save(self):
             # This method will be called whenever the autosave menu item is toggled
