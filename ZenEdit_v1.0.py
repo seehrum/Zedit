@@ -1,5 +1,4 @@
 import tkinter as tk
-from tkinter import messagebox
 from tkinter import filedialog, colorchooser, font, simpledialog, messagebox
 import json
 import os
