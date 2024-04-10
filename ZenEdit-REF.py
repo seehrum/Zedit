@@ -449,9 +449,13 @@ class ZenEdit:
 
     def toggle_caret_cursor_visibility(self):
         if self.text_area['insertwidth'] > 1:
+            # Save the current insertwidth to the configuration before hiding the cursor
+            self.config['insertwidth'] = self.text_area['insertwidth']
             self.text_area.config(insertwidth=0)
         else:
-            self.text_area.config(insertwidth=2)
+            # Restore the insertwidth from the configuration when showing the cursor
+            insertwidth = self.config.get('insertwidth', 2)  # Default to 2 if not found
+            self.text_area.config(insertwidth=insertwidth)
 
     def toggle_caret_cursor_blink(self):
             if self.text_area['insertofftime'] == 0:
