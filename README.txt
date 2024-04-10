@@ -1,5 +1,3 @@
-README
-
 ZenEdit v1.0 - The Minimalist, Distraction-Free Text Editor
 
 Table of Contents
