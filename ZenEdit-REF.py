@@ -64,6 +64,8 @@ class ZenEdit:
         self.root.bind("<F3>", self.search_text)
         self.root.bind("<Control-f>", lambda event: self.search_text())
         self.root.bind("<Control-F>", lambda event: self.search_text())
+        self.root.bind("<Control-g>", lambda event: self.goto_line())
+        self.root.bind("<Control-G>", lambda event: self.goto_line())
         self.root.bind("<Control-h>", self.replace_text)
         self.root.bind("<Control-H>", self.replace_text)
         self.root.bind("<Control-n>", lambda event: self.new_file())
@@ -104,7 +106,7 @@ class ZenEdit:
         self.edit_menu.add_command(label="Select All (CTRL+A)", command=self.select_all)
         self.edit_menu.add_command(label="Search (F3)", command=self.search_text)
         self.edit_menu.add_command(label="Replace (Control-H)", command=self.replace_text)
-        self.edit_menu.add_command(label="Go to Line...", command=self.goto_line)
+        self.edit_menu.add_command(label="Go to Line... (CTRL+G)", command=self.goto_line)
         self.edit_menu.add_separator()
         self.edit_menu.add_command(label="Toggle Line Numbers (F5)", command=self.toggle_line_numbers)
 
