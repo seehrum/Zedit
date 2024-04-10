@@ -62,56 +62,66 @@ class ZenEdit:
         self.format_menu = tk.Menu(self.menu, tearoff=0)
         self.settings_menu = tk.Menu(self.menu, tearoff=0)
 
-        self.file_menu.add_command(label="New", command=self.new_file)
-        self.file_menu.add_command(label="Open", command=self.open_file)
-        self.file_menu.add_command(label="Save", command=self.save_file)
+        self.file_menu = tk.Menu(self.menu, tearoff=0)
+        self.file_menu.add_command(label="New (F9)", command=self.new_file)
+        self.file_menu.add_command(label="Open (F10)", command=self.open_file)
+        self.file_menu.add_command(label="Save (F12)", command=self.save_file)
         self.file_menu.add_command(label="Save As...", command=self.save_as_file)
         self.file_menu.add_separator()
-        self.file_menu.add_command(label="Exit", command=self.quit)
+        self.file_menu.add_command(label="Exit (F2)", command=self.quit)
 
-        self.edit_menu.add_command(label="Undo", command=self.undo_text)
-        self.edit_menu.add_command(label="Redo", command=self.redo_text)
+        self.edit_menu = tk.Menu(self.menu, tearoff=0)
+        self.edit_menu.add_command(label="Undo (CTRL+Z)", command=self.undo_text)
+        self.edit_menu.add_command(label="Redo (CTRL+Y)", command=self.redo_text)
         self.edit_menu.add_separator()
-        self.edit_menu.add_command(label="Copy", command=self.copy_text)
-        self.edit_menu.add_command(label="Cut", command=self.cut_text)
-        self.edit_menu.add_command(label="Paste", command=self.paste_text)
+        self.edit_menu.add_command(label="Copy (CTRL+C)", command=self.copy_text)
+        self.edit_menu.add_command(label="Cut (CTRL+X)", command=self.cut_text)
+        self.edit_menu.add_command(label="Paste (CTRL+V)", command=self.paste_text)
         self.edit_menu.add_separator()
-        self.edit_menu.add_command(label="Select All", command=self.select_all)
-        self.edit_menu.add_command(label="Search", command=self.search_text)
-        self.edit_menu.add_command(label="Replace", command=self.replace_text)
-        self.edit_menu.add_command(label="Go to Line", command=self.goto_line)
+        self.edit_menu.add_command(label="Select All (CTRL+A)", command=self.select_all)
+        self.edit_menu.add_command(label="Search (F7)", command=self.search_text)
+        self.edit_menu.add_command(label="Replace (F8)", command=self.replace_text)
+        self.edit_menu.add_command(label="Go to Line...", command=self.goto_line)
+        self.edit_menu.add_separator()
+        self.edit_menu.add_command(label="Toggle Line Numbers (F5)", command=self.toggle_line_numbers)
 
-        self.view_menu.add_command(label="Toggle Full Screen", command=self.toggle_full_screen)
+        self.view_menu = tk.Menu(self.menu, tearoff=0)
+        self.view_menu.add_command(label="FullScreen (F11)", command=self.toggle_full_screen)
         self.view_menu.add_separator()
-        self.view_menu.add_command(label="Show Word/Character Count", command=self.show_word_char_count)
+        self.view_menu.add_command(label="Word/Character Count (F6)", command=self.show_word_char_count)
         self.view_menu.add_command(label="Set Text Area Size", command=self.set_text_area_size)
         self.view_menu.add_command(label="Set Padding", command=self.set_padding)
+        self.view_menu.add_separator()
         self.view_menu.add_command(label="Toggle Border", command=self.toggle_border)
         self.view_menu.add_command(label="Toggle Mouse Cursor Visibility", command=self.toggle_mouse_cursor_visibility)
+        self.view_menu.add_command(label="Toggle Caret Cursor Visibility", command=self.toggle_caret_cursor_visibility)
         self.view_menu.add_command(label="Toggle Caret Cursor Blink", command=self.toggle_caret_cursor_blink)
-        self.view_menu.add_command(label="Set Caret Cursor Blink_speed", command=self.set_caret_cursor_blink_speed)
+        self.view_menu.add_command(label="Set Caret Cursor Blink Speed", command=self.set_caret_cursor_blink_speed)
 
+        self.format_menu = tk.Menu(self.menu, tearoff=0)
         self.format_menu.add_command(label="Change Font", command=self.change_font)
         self.format_menu.add_command(label="Change Font Size", command=self.change_font_size)
         self.format_menu.add_separator()
         self.format_menu.add_command(label="Set Line Spacing", command=self.set_line_spacing)
+        self.format_menu.add_separator()
         self.format_menu.add_command(label="Align Left", command=self.align_left)
-        self.format_menu.add_command(label="Align Center", command=self.align_center)
+        self.format_menu.add_command(label="Center", command=self.align_center)
         self.format_menu.add_command(label="Align Right", command=self.align_right)
 
-        self.settings_menu.add_separator()
+        self.settings_menu = tk.Menu(self.menu, tearoff=0)
         self.settings_menu.add_command(label="Toggle Root Background Image", command=self.toggle_root_background_image)
         self.settings_menu.add_command(label="Change Root Background Color", command=self.change_root_bg_color)
-        self.settings_menu.add_command(label="Change Text Area Background Color", command=self.change_text_area_bg_color)
+        self.settings_menu.add_command(label="Change Background Color", command=self.change_text_area_bg_color)
         self.settings_menu.add_command(label="Change Text Color", command=self.change_fg_color)
         self.settings_menu.add_command(label="Change Caret Cursor Color", command=self.change_caret_cursor_color)
         self.settings_menu.add_command(label="Change Selection Color", command=self.change_selection_color)
-        self.settings_menu.add_command(label="Change Selection Text Color", command=self.change_selection_text_color)
+        self.settings_menu.add_command(label="Change Selection Text Color", command=self.change_selection_text_color,)
         self.settings_menu.add_command(label="Change Border Color", command=self.change_border_color)
+        self.settings_menu.add_separator()
         self.settings_menu.add_command(label="Set Border Thickness", command=self.set_border_thickness)
         self.settings_menu.add_command(label="Set Caret Cursor Thickness", command=self.set_caret_cursor_thickness)
+        self.settings_menu.add_separator()
         self.settings_menu.add_checkbutton(label="Enable Autosave", onvalue=True, offvalue=False, variable=self.auto_save_enabled, command=self.toggle_auto_save)
-
 
         self.menu.add_cascade(label="File", menu=self.file_menu)
         self.menu.add_cascade(label="Edit", menu=self.edit_menu)
@@ -150,6 +160,7 @@ class ZenEdit:
             selectbackground=self.config["selection_color"],
             selectforeground=self.config["selection_text_color"]
         )
+        self.text_area.tag_configure("blink", foreground=self.config["fg_color"], background=self.config["bg_color"])
         self.text_area.pack(side="top", fill="both", expand="yes")
 
         self.text_area.bind("<Control-s>", self.save_file)
@@ -412,6 +423,12 @@ class ZenEdit:
         else:
             self.text_area.config(cursor="xterm")
 
+    def toggle_caret_cursor_visibility(self):
+        if self.text_area['insertwidth'] > 1:
+            self.text_area.config(insertwidth=0)
+        else:
+            self.text_area.config(insertwidth=1)
+
     def toggle_caret_cursor_blink(self):
             if self.text_area['insertofftime'] == 0:
                 self.text_area.config(insertofftime=300, insertontime=600)
@@ -655,7 +672,6 @@ class ZenEdit:
 
     def show_about(self):
         messagebox.showinfo("About ZenEdit", "ZenEdit v2.0\nA simple text editor built with Tkinter.")
-
     def toggle_text_blink(self, event=None):
         if hasattr(self, 'blink_id'):
             # Stop blinking if it's already happening
@@ -698,14 +714,13 @@ class ZenEdit:
         self.text_area.tag_add("blink", "1.0", "end")
 
         self.blink_id = self.root.after(self.blink_speed, self.start_blinking)
-
-    def auto_save(self):
-            if self.auto_save_enabled.get():  # Check if autosave is enabled
-                # Determine the file path: use the current file path if available, otherwise fallback to a default
-                filepath = self.current_file_path if hasattr(self, 'current_file_path') and self.current_file_path else self.auto_save_file
-                with open(filepath, "w") as file:
-                    file.write(self.text_area.get(1.0, tk.END))
-            self.root.after(self.auto_save_interval, self.auto_save)
+            
+    def toggle_menu_view(self):
+        if not self.fullScreenState:
+            if self.root.cget('menu'):
+                self.root.config(menu='')
+            else:
+                self.root.config(menu=self.menu)
 
     def save_config(self):
         with open(self.config_file, "w") as file:
