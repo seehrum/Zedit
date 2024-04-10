@@ -528,8 +528,8 @@ class ZenEdit:
     def change_font(self):
         font_window = tk.Toplevel(self.root)
         font_window.title("Choose Font")
-        font_window.geometry("500x310")  # Set a fixed size for the font window
-        font_listbox = tk.Listbox(font_window, width=30, height=10)
+        font_window.geometry("500x310")
+        font_listbox = tk.Listbox(font_window, width=30, height=10, exportselection=False)
         font_listbox.pack(side="left", fill="y")
         scrollbar = tk.Scrollbar(font_window, command=font_listbox.yview)
         scrollbar.pack(side="left", fill="y")
@@ -546,19 +546,19 @@ class ZenEdit:
         size_entry.pack()
 
         def update_preview(*args):
-            font_name = font_listbox.get(tk.ANCHOR) or self.config["font_family"]
+            if font_listbox.curselection():
+                index = font_listbox.curselection()[0]
+                font_name = font_listbox.get(index)
+            else:
+                font_name = self.config["font_family"]
             bold = 'bold' if is_bold.get() else 'normal'
             italic = 'italic' if is_italic.get() else 'roman'
-            try:
-                size = font_size.get()
-            except tk.TclError:
-                size = self.config.get("font_size", 12)  # Default size if get() fails
-                font_size.set(size)
+            size = font_size.get()
             preview_font = font.Font(family=font_name, size=size, weight=bold, slant=italic)
             preview_label.config(font=preview_font)
 
         def apply_font():
-            self.config["font_family"] = font_listbox.get(tk.ANCHOR) or self.config.get("font_family", "Arial")
+            self.config["font_family"] = font_listbox.get(font_listbox.curselection()) or self.config.get("font_family", "Arial")
             self.config["font_size"] = font_size.get()
             self.config["font_bold"] = is_bold.get()
             self.config["font_italic"] = is_italic.get()
@@ -571,6 +571,7 @@ class ZenEdit:
             self.text_area.config(font=self.current_font)
             self.save_config()
             font_window.destroy()
+
         font_listbox.bind("<<ListboxSelect>>", update_preview)
         is_bold.trace('w', update_preview)
         is_italic.trace('w', update_preview)
@@ -579,8 +580,8 @@ class ZenEdit:
             font_listbox.insert(tk.END, fnt)
         apply_button = tk.Button(font_window, text="Apply", command=apply_font)
         apply_button.pack(pady=10)
-
         update_preview()  # Initial preview update
+
 
     def change_font_size(self):
             font_size = simpledialog.askinteger(
