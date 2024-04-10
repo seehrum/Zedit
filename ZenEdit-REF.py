@@ -109,7 +109,7 @@ class ZenEdit:
         self.view_menu.add_command(label="Set Text Area Size", command=self.set_text_area_size)
         self.view_menu.add_command(label="Set Padding", command=self.set_padding)
         self.view_menu.add_separator()
-        self.view_menu.add_command(label="Toggle Border", command=self.toggle_border_visibility)
+        self.view_menu.add_command(label="Toggle Border Visibility", command=self.toggle_border_visibility)
         self.view_menu.add_command(label="Toggle Mouse Cursor Visibility", command=self.toggle_mouse_cursor_visibility)
         self.view_menu.add_command(label="Toggle Caret Cursor Visibility", command=self.toggle_caret_cursor_visibility)
         self.view_menu.add_command(label="Toggle Caret Cursor Blink", command=self.toggle_caret_cursor_blink)
