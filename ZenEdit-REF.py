@@ -220,43 +220,44 @@ class ZenEdit:
             self.text_area.edit_modified(False)
 
     def open_file(self):
-        filepath = filedialog.askopenfilename(
-            filetypes=[("Text Files", "*.txt"), ("All Files", "*.*")]
-        )
+        filepath = filedialog.askopenfilename(filetypes=[("Text Files", "*.txt"), ("All Files", "*.*")])
         if not filepath:
             return
-        with open(filepath, "r") as file:
-            self.text_area.delete(1.0, tk.END)
-            self.text_area.insert(tk.END, file.read())
+        try:
+            with open(filepath, "r") as file:
+                self.text_area.delete(1.0, tk.END)
+                self.text_area.insert(tk.END, file.read())
             self.current_file_path = filepath  # Store the current file path
-        self.root.title(f"ZenEdit - {os.path.basename(filepath)}")
+            self.root.title(f"ZenEdit - {os.path.basename(filepath)}")
+        except Exception as e:
+            messagebox.showerror("Open File", f"Failed to open file: {e}")
 
     def save_file(self, event=None):
-        if hasattr(self, 'current_file_path') and self.current_file_path:
-            filepath = self.current_file_path
-        else:
-            filepath = filedialog.asksaveasfilename(
-                defaultextension=".txt",
-                filetypes=[("Text Files", "*.txt"), ("All Files", "*.*")],
-            )
+        filepath = self.current_file_path if hasattr(self, 'current_file_path') and self.current_file_path else None
+        if not filepath:
+            filepath = filedialog.asksaveasfilename(defaultextension=".txt", filetypes=[("Text Files", "*.txt"), ("All Files", "*.*")])
             if not filepath:
                 return
             self.current_file_path = filepath  # Store the new file path
-        with open(filepath, "w") as file:
-            file.write(self.text_area.get(1.0, tk.END))
-        self.root.title(f"ZenEdit - {os.path.basename(filepath)}")
+
+        try:
+            with open(filepath, "w") as file:
+                file.write(self.text_area.get(1.0, tk.END))
+            self.root.title(f"ZenEdit - {os.path.basename(filepath)}")
+        except Exception as e:
+            messagebox.showerror("Save File", f"Failed to save file: {e}")
 
     def save_as_file(self):
-        filepath = filedialog.asksaveasfilename(
-            defaultextension=".txt",
-            filetypes=[("Text Files", "*.txt"), ("All Files", "*.*")],
-        )
+        filepath = filedialog.asksaveasfilename(defaultextension=".txt", filetypes=[("Text Files", "*.txt"), ("All Files", "*.*")])
         if not filepath:
             return
-        with open(filepath, "w") as file:
-            file.write(self.text_area.get(1.0, tk.END))
-        self.current_file_path = filepath  # Update current file path
-        self.root.title(f"ZenEdit - {os.path.basename(filepath)}")
+        try:
+            with open(filepath, "w") as file:
+                file.write(self.text_area.get(1.0, tk.END))
+            self.current_file_path = filepath  # Update current file path
+            self.root.title(f"ZenEdit - {os.path.basename(filepath)}")
+        except Exception as e:
+            messagebox.showerror("Save As File", f"Failed to save file: {e}")
 
     def quit(self):
         response = False
@@ -760,7 +761,7 @@ class ZenEdit:
 
     def show_about(self):
         messagebox.showinfo("About ZenEdit", "ZenEdit v2.0\nA simple text editor built with Tkinter.")
-        
+
     def toggle_text_blink(self, event=None):
         if hasattr(self, 'is_blinking') and self.is_blinking:
             # Stop blinking
