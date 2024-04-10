@@ -14,6 +14,12 @@ class ZenEdit:
         self.auto_save_enabled.trace('w', lambda *args: self.update_config("auto_save_enabled", self.auto_save_enabled.get()))
         self.auto_save_interval = 5000
 
+        script_dir = os.path.dirname(os.path.realpath(__file__))
+        icon_path = os.path.join(script_dir, 'zenedit.png')
+
+        img = tk.PhotoImage(file=icon_path)
+        self.root.iconphoto(False, img)
+
         self.load_config()
         self.fullScreenState = False
         self.root_bg_image_visible = False
