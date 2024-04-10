@@ -742,6 +742,14 @@ class ZenEdit:
 
         self.blink_id = self.root.after(self.blink_speed, self.start_blinking)
 
+    def toggle_menu_view(self):
+        # This function will only work when the window is not in full-screen mode
+        if not self.fullScreenState:
+            if self.root.cget('menu'):
+                self.root.config(menu='')  # Hide the menu
+            else:
+                self.root.config(menu=self.menu)
+
     def save_config(self):
         with open(self.config_file, 'w') as file:
             json.dump(self.config, file, indent=4)
