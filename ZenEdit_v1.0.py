@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import messagebox
 from tkinter import filedialog, colorchooser, font, simpledialog, messagebox
 import json
 import os
@@ -6,6 +7,10 @@ import os
 class ZenEdit:
     def __init__(self, root):
         self.root = root
+        self.lock_file_path = "zenedit.lock"
+        if not self.check_single_instance():
+            messagebox.showerror("ZenEdit", "Another instance of the application is already running.")
+            exit()
         self.root.geometry("800x495")
         self.root.title("ZenEdit")
         self.config_file = "editor_config.json"
@@ -215,6 +220,28 @@ class ZenEdit:
     def update_config(self, key, value):
         self.config[key] = value
         self.save_config()
+
+    def check_single_instance(self):
+            """
+            Check if there is already an instance running, based on a lock file.
+            """
+            if os.path.exists(self.lock_file_path):
+                # If the lock file exists, return False indicating another instance is running
+                return False
+            else:
+                # Try to create a lock file to signify that this instance is running
+                with open(self.lock_file_path, 'w') as f:
+                    f.write("Running")
+                return True
+
+    def quit(self):
+        """
+        Clean up before quitting the application.
+        """
+        # Your existing quit logic...
+        if os.path.exists(self.lock_file_path):
+            os.remove(self.lock_file_path)
+        self.root.destroy()
 
 #File
     def new_file(self):
