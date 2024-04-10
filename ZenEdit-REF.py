@@ -350,21 +350,64 @@ class ZenEdit:
             search_entry.bind("<Return>", lambda event: do_search(next=True))
 
     def replace_text(self, event=None):
-            search_query = simpledialog.askstring("Replace", "Find what:")
-            if not search_query:
-                return
-            replacement = simpledialog.askstring("Replace", "Replace with:")
-            if replacement is None:
-                return
-            all_text = self.text_area.get("1.0", tk.END)
-            count = all_text.count(search_query)
-            updated_text = all_text.replace(search_query, replacement)
-            self.text_area.delete("1.0", tk.END)
-            self.text_area.insert("1.0", updated_text)
-            messagebox.showinfo(
-                "Replace",
-                f"Replaced {count} occurrences of '{search_query}' with '{replacement}'.",
-            )
+        replace_window = tk.Toplevel(self.root)
+        replace_window.title("Replace Text")
+
+        # Find what label and entry
+        tk.Label(replace_window, text="Find what:").pack(side=tk.LEFT)
+        find_entry = tk.Entry(replace_window)
+        find_entry.pack(side=tk.LEFT, fill=tk.X, expand=True)
+
+        # Replace with label and entry
+        tk.Label(replace_window, text="Replace with:").pack(side=tk.LEFT)
+        replace_entry = tk.Entry(replace_window)
+        replace_entry.pack(side=tk.LEFT, fill=tk.X, expand=True)
+
+        # Case sensitivity checkbox
+        case_sensitive = tk.BooleanVar(value=False)
+        tk.Checkbutton(replace_window, text="Case Sensitive", variable=case_sensitive).pack(side=tk.LEFT)
+
+        def do_replace():
+            search_query = find_entry.get()
+            replacement = replace_entry.get()
+            if search_query and replacement is not None:  # Check both fields are filled
+                all_text = self.text_area.get("1.0", tk.END)
+                count = 0
+
+                if case_sensitive.get():
+                    count = all_text.count(search_query)
+                    updated_text = all_text.replace(search_query, replacement)
+                else:
+                    # Lowercase everything for a case-insensitive count and then replace
+                    lower_text = all_text.lower()
+                    lower_query = search_query.lower()
+                    count = lower_text.count(lower_query)
+
+                    # Perform case-insensitive replacement
+                    updated_text = ''
+                    start = 0
+                    while True:
+                        idx = lower_text.find(lower_query, start)
+                        if idx == -1:  # No more occurrences
+                            updated_text += all_text[start:]  # Append the rest of the text
+                            break
+                        updated_text += all_text[start:idx] + replacement  # Replace this occurrence
+                        start = idx + len(search_query)
+
+                self.text_area.delete("1.0", tk.END)
+                self.text_area.insert("1.0", updated_text)
+                messagebox.showinfo(
+                    "Replace",
+                    f"Replaced {count} occurrences of '{search_query}' with '{replacement}'.",
+                )
+                replace_window.destroy()
+
+        # Replace button
+        replace_button = tk.Button(replace_window, text="Replace All", command=do_replace)
+        replace_button.pack(side=tk.LEFT)
+
+        # Focus on the find entry
+        find_entry.focus_set()
 
     def goto_line(self):
             line_number = simpledialog.askinteger("Go to Line", "Enter line number:")
