@@ -760,20 +760,7 @@ class ZenEdit:
 
     def show_about(self):
         messagebox.showinfo("About ZenEdit", "ZenEdit v2.0\nA simple text editor built with Tkinter.")
-    
-    def toggle_text_blink(self, event=None):
-        if hasattr(self, 'blink_id'):
-            # Stop blinking if it's already happening
-            self.root.after_cancel(self.blink_id)
-            del self.blink_id
-            self.text_area.tag_remove("blink", "1.0", "end")
-        else:
-            # Start blinking by asking the user for the speed
-            blink_speed = simpledialog.askinteger("Blink Speed", "Enter blink speed in milliseconds:", minvalue=100, maxvalue=5000)
-            if blink_speed:
-                self.blink_speed = blink_speed
-                self.start_blinking()
-
+        
     def toggle_text_blink(self, event=None):
         if hasattr(self, 'is_blinking') and self.is_blinking:
             # Stop blinking
