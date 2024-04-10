@@ -38,6 +38,7 @@ class ZenEdit:
             self.config.setdefault(key, value)
 
     def setup_bindings(self):
+        self.root.bind("<F1>", self.toggle_text_blink)
         self.root.bind("<F2>", lambda event: self.quit())
         self.root.bind("<F4>", lambda event: self.toggle_menu_view())
         self.root.bind("<F5>", lambda event: self.toggle_line_numbers())
@@ -382,17 +383,16 @@ class ZenEdit:
             )
 
     def set_text_area_size(self):
-            current_width = self.frame.winfo_width()
-            current_height = self.frame.winfo_height()
-            current_dimensions = f"{current_width}x{current_height}"
-            dimensions = simpledialog.askstring("Text Area Size", "Enter size in pixels (width x height):", initialvalue=current_dimensions)
-            if dimensions and 'x' in dimensions:
-                pixel_width, pixel_height = map(int, dimensions.split('x'))
-                self.frame.config(width=pixel_width, height=pixel_height)
-                self.frame.pack_propagate(False)
-                self.config["text_width"] = pixel_width
-                self.config["text_height"] = pixel_height
-                self.save_config()
+        current_dimensions = f"{self.frame.winfo_width()}x{self.frame.winfo_height()}"
+        dimensions = simpledialog.askstring("Text Area Size", "Enter size in pixels (width x height):", initialvalue=current_dimensions)
+        if dimensions and 'x' in dimensions:
+            pixel_width, pixel_height = map(int, dimensions.split('x'))
+            self.frame.config(width=pixel_width, height=pixel_height)
+            self.frame.pack_propagate(False)
+            self.text_area.config(width=pixel_width, height=pixel_height)
+            self.config["text_width"] = pixel_width
+            self.config["text_height"] = pixel_height
+            self.save_config()
 
     def set_padding(self):
             padding = simpledialog.askinteger("Padding", "Enter padding size:", minvalue=0)
@@ -656,13 +656,48 @@ class ZenEdit:
     def show_about(self):
         messagebox.showinfo("About ZenEdit", "ZenEdit v2.0\nA simple text editor built with Tkinter.")
 
-    def toggle_menu_view(self):
-        # This function will only work when the window is not in full-screen mode
-        if not self.fullScreenState:
-            if self.root.cget('menu'):
-                self.root.config(menu='')  # Hide the menu
-            else:
-                self.root.config(menu=self.menu)  # Show the menu
+    def toggle_text_blink(self, event=None):
+        if hasattr(self, 'blink_id'):
+            # Stop blinking if it's already happening
+            self.root.after_cancel(self.blink_id)
+            del self.blink_id
+            self.text_area.tag_remove("blink", "1.0", "end")
+        else:
+            # Start blinking by asking the user for the speed
+            blink_speed = simpledialog.askinteger("Blink Speed", "Enter blink speed in milliseconds:", minvalue=100, maxvalue=5000)
+            if blink_speed:
+                self.blink_speed = blink_speed
+                self.start_blinking()
+
+    def toggle_text_blink(self, event=None):
+        if hasattr(self, 'is_blinking') and self.is_blinking:
+            # Stop blinking
+            self.is_blinking = False
+            if hasattr(self, 'blink_id'):
+                self.root.after_cancel(self.blink_id)
+                del self.blink_id
+            self.text_area.tag_remove("blink", "1.0", "end")
+        else:
+            # Start blinking, ask user for blink speed
+            blink_speed = simpledialog.askinteger("Blink Speed", "Enter blink speed in milliseconds:", initialvalue=500)
+            if blink_speed is not None:
+                self.blink_speed = blink_speed
+                self.is_blinking = True
+                self.start_blinking()
+
+    def start_blinking(self):
+        if not self.is_blinking:
+            return
+
+        current_fg_color = self.text_area.tag_cget("blink", "foreground")
+        bg_color = self.config.get("bg_color", "#1e1e1e")  # Assume default background color
+        fg_color = self.config.get("fg_color", "#ffffff")  # Assume default foreground color
+
+        new_color = bg_color if current_fg_color == fg_color else fg_color
+        self.text_area.tag_configure("blink", foreground=new_color)
+        self.text_area.tag_add("blink", "1.0", "end")
+
+        self.blink_id = self.root.after(self.blink_speed, self.start_blinking)
 
     def auto_save(self):
             if self.auto_save_enabled.get():  # Check if autosave is enabled
