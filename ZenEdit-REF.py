@@ -557,7 +557,7 @@ class ZenEdit:
             preview_font = font.Font(family=font_name, size=size, weight=bold, slant=italic)
             preview_label.config(font=preview_font)
 
-        def apply_font():
+        def apply_font(*args):  # Added *args to handle the event parameter
             self.config["font_family"] = font_listbox.get(font_listbox.curselection()) or self.config.get("font_family", "Arial")
             self.config["font_size"] = font_size.get()
             self.config["font_bold"] = is_bold.get()
@@ -576,11 +576,16 @@ class ZenEdit:
         is_bold.trace('w', update_preview)
         is_italic.trace('w', update_preview)
         font_size.trace('w', update_preview)
+        font_window.bind('<Return>', apply_font)
+
         for fnt in font.families():
             font_listbox.insert(tk.END, fnt)
+
         apply_button = tk.Button(font_window, text="Apply", command=apply_font)
         apply_button.pack(pady=10)
+
         update_preview()  # Initial preview update
+
 
 
     def change_font_size(self):
