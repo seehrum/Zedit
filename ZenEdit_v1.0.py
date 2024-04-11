@@ -175,8 +175,9 @@ class ZenEdit:
         self.settings_menu.add_command(label="Set Border Thickness", command=self.set_border_thickness)
         self.settings_menu.add_command(label="Set Caret Cursor Thickness", command=self.set_caret_cursor_thickness)
         self.settings_menu.add_separator()
-        self.settings_menu.add_checkbutton(label="Enable Autosave", onvalue=True, offvalue=False, variable=self.auto_save_enabled, command=self.toggle_auto_save)
         self.settings_menu.add_command(label="Reset to Default Theme", command=self.reset_to_default_theme)
+        self.settings_menu.add_separator()
+        self.settings_menu.add_checkbutton(label="Enable Autosave", onvalue=True, offvalue=False, variable=self.auto_save_enabled, command=self.toggle_auto_save)
 
         self.menu.add_cascade(label="File", menu=self.file_menu)
         self.menu.add_cascade(label="Edit", menu=self.edit_menu)
@@ -785,6 +786,40 @@ class ZenEdit:
         else:
             messagebox.showerror("Invalid Thickness", "Caret cursor thickness must be a positive integer.")
 
+    def reset_to_default_theme(self):
+                if os.path.exists(self.config_file):
+                    os.remove(self.config_file)
+                self.config = self.default_config.copy()
+                self.apply_config()
+                self.save_config()
+                messagebox.showinfo("Reset to Default", "The theme has been reset to default.")
+
+    def apply_config(self):
+                # Update the root window's background color
+                self.root.config(bg=self.config["root_bg_color"])
+
+                # Update the text area's font, background color, foreground color, etc.
+                current_font = font.Font(family=self.config["font_family"],
+                                        size=self.config["font_size"],
+                                        weight="bold" if self.config["font_bold"] else "normal",
+                                        slant="italic" if self.config["font_italic"] else "roman")
+                self.text_area.config(font=current_font,
+                                    bg=self.config["bg_color"],
+                                    fg=self.config["fg_color"],
+                                    insertbackground=self.config["caret_cursor_color"],
+                                    selectbackground=self.config["selection_color"],
+                                    selectforeground=self.config["selection_text_color"],
+                                    highlightbackground=self.config["border_color"],
+                                    highlightcolor=self.config["border_color"],
+                                    spacing3=self.config["line_spacing"],
+                                    highlightthickness=self.config["border_thickness"],
+                                    insertwidth=self.config["insertwidth"])
+
+                # Update the frame and text area size based on configuration
+                self.frame.config(width=self.config["text_width"], height=self.config["text_height"])
+                self.frame.pack_propagate(False)  # This makes the frame not to resize to fit its content
+                self.text_area.config(width=self.config["text_width"], height=self.config["text_height"])
+    
     def toggle_auto_save(self):
             # This method will be called whenever the autosave menu item is toggled
             if self.auto_save_enabled.get():
@@ -799,40 +834,6 @@ class ZenEdit:
                 with open(filepath, "w") as file:
                     file.write(self.text_area.get(1.0, tk.END))
             self.root.after(self.auto_save_interval, self.auto_save)
-
-    def reset_to_default_theme(self):
-            if os.path.exists(self.config_file):
-                os.remove(self.config_file)
-            self.config = self.default_config.copy()
-            self.apply_config()
-            self.save_config()
-            messagebox.showinfo("Reset to Default", "The theme has been reset to default.")
-
-    def apply_config(self):
-        # Update the root window's background color
-        self.root.config(bg=self.config["root_bg_color"])
-
-        # Update the text area's font, background color, foreground color, etc.
-        current_font = font.Font(family=self.config["font_family"],
-                                size=self.config["font_size"],
-                                weight="bold" if self.config["font_bold"] else "normal",
-                                slant="italic" if self.config["font_italic"] else "roman")
-        self.text_area.config(font=current_font,
-                            bg=self.config["bg_color"],
-                            fg=self.config["fg_color"],
-                            insertbackground=self.config["caret_cursor_color"],
-                            selectbackground=self.config["selection_color"],
-                            selectforeground=self.config["selection_text_color"],
-                            highlightbackground=self.config["border_color"],
-                            highlightcolor=self.config["border_color"],
-                            spacing3=self.config["line_spacing"],
-                            highlightthickness=self.config["border_thickness"],
-                            insertwidth=self.config["insertwidth"])
-
-        # Update the frame and text area size based on configuration
-        self.frame.config(width=self.config["text_width"], height=self.config["text_height"])
-        self.frame.pack_propagate(False)  # This makes the frame not to resize to fit its content
-        self.text_area.config(width=self.config["text_width"], height=self.config["text_height"])
 
     def show_about(self):
         messagebox.showinfo("About ZenEdit", "ZenEdit v2.0\nA simple text editor built with Tkinter.")
