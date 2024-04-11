@@ -6,25 +6,27 @@ import os
 class ZenEdit:
     def __init__(self, root):
         self.default_config = {
-            "root_bg_color": "#1e1e1e",
-            "font_family": "Arial",
-            "font_size": 16,
-            "font_bold": False,
-            "font_italic": False,
-            "bg_color": "#1e1e1e",
-            "fg_color": "#ffffff",
-            "caret_cursor_color": "white",
-            "selection_color": "#3399ff",
-            "selection_text_color": "#ffffff",
-            "caret_cursor": False,
-            "text_width": 800,
-            "text_height": 945,
-            "line_spacing": 4,
-            "border_thickness": 1,
-            "border_color": "#ffffff",
-            "padding": 0,
-            "insertwidth": 2
-        }
+                    "root_bg_color": "#1e1e1e",
+                    "font_family": "Arial",
+                    "font_size": 16,
+                    "font_bold": False,
+                    "font_italic": False,
+                    "bg_color": "#1e1e1e",
+                    "fg_color": "#ffffff",
+                    "caret_cursor_color": "white",
+                    "selection_color": "#3399ff",
+                    "selection_text_color": "#ffffff",
+                    "caret_cursor": False,
+                    "text_width": 800,
+                    "text_height": 945,
+                    "line_spacing": 4,
+                    "border_thickness": 1,
+                    "border_color": "#ffffff",
+                    "padding": 0,
+                    "insertwidth": 2
+                }
+        self.config = self.default_config.copy()
+
         self.root = root
         self.root.geometry("800x495")
         self.root.title("ZenEdit")
@@ -51,35 +53,11 @@ class ZenEdit:
         self.auto_save()
 
     def load_config(self):
-        defaults = {
-        "root_bg_color": "#1e1e1e",
-        "font_family": "Arial",
-        "font_size": 16,
-        "font_bold": False,
-        "font_italic": False,
-        "bg_color": "#1e1e1e",
-        "fg_color": "#ffffff",
-        "caret_cursor_color": "white",
-        "selection_color": "#3399ff",
-        "selection_text_color": "#ffffff",
-        "caret_cursor": False,
-        "text_width": 800,
-        "text_height": 945,
-        "line_spacing": 4,
-        "border_thickness": 1,
-        "border_color": "#ffffff",
-        "padding": 0,
-        "insertwidth": 2
-        }
-
-        if os.path.isfile(self.config_file):
-            with open(self.config_file, "r") as file:
-                self.config = json.load(file)
-        else:
-            self.config = defaults
-
-        for key, value in defaults.items():
-            self.config.setdefault(key, value)
+            if os.path.isfile(self.config_file):
+                with open(self.config_file, "r") as file:
+                    file_config = json.load(file)
+                    
+                    self.config.update(file_config)
 
     def setup_bindings(self):
         self.root.bind("<Control-q>", lambda event: self.quit())
