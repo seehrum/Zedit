@@ -48,21 +48,11 @@ class ZenEdit:
             self.config = self.default_config.copy()
 
     def setup_ui(self):
-        self.setup_icon()
         self.setup_frame_and_text_area()
         self.setup_menus()
         self.setup_bindings()
         self.auto_save()
-
-    def setup_icon(self):
-        try:
-            script_dir = os.path.dirname(os.path.realpath(__file__))
-            icon_path = os.path.join(script_dir, 'zenedit.png')
-            img = tk.PhotoImage(file=icon_path)
-            self.root.iconphoto(False, img)
-        except Exception as e:
-            pass
-
+        
     def setup_frame_and_text_area(self):
         self.frame = tk.Frame(self.root, bg=self.config["bg_color"])
         self.frame.pack(expand=True)
@@ -826,4 +816,3 @@ if __name__ == "__main__":
     editor = ZenEdit(root)
     root.protocol("WM_DELETE_WINDOW", editor.quit)
     root.mainloop()
-            
