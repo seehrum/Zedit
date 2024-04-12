@@ -60,7 +60,7 @@ class ZenEdit:
             icon_path = os.path.join(script_dir, 'zenedit.png')
             img = tk.PhotoImage(file=icon_path)
             self.root.iconphoto(False, img)
-        except Exception:
+        except Exception as e:
             pass
 
     def setup_frame_and_text_area(self):
