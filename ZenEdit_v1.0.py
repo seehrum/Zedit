@@ -55,13 +55,13 @@ class ZenEdit:
         self.auto_save()
 
     def setup_icon(self):
-        try:
-            script_dir = os.path.dirname(os.path.realpath(__file__))
-            icon_path = os.path.join(script_dir, 'zenedit.png')
-            img = tk.PhotoImage(file=icon_path)
-            self.root.iconphoto(False, img)
-        except Exception as e:
-            messagebox.showerror("Error", f"Failed to load icon: {e}")
+    try:
+        script_dir = os.path.dirname(os.path.realpath(__file__))
+        icon_path = os.path.join(script_dir, 'zenedit.png')
+        img = tk.PhotoImage(file=icon_path)
+        self.root.iconphoto(False, img)
+    except Exception:
+        pass
 
     def setup_frame_and_text_area(self):
         self.frame = tk.Frame(self.root, bg=self.config["bg_color"])
