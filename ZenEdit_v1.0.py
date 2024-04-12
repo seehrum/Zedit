@@ -5,61 +5,120 @@ import os
 
 class ZenEdit:
     def __init__(self, root):
-        self.default_config = {
-                    "root_bg_color": "#1e1e1e",
-                    "font_family": "Arial",
-                    "font_size": 16,
-                    "font_bold": False,
-                    "font_italic": False,
-                    "bg_color": "#1e1e1e",
-                    "fg_color": "#ffffff",
-                    "caret_cursor_color": "white",
-                    "selection_color": "#3399ff",
-                    "selection_text_color": "#ffffff",
-                    "caret_cursor": False,
-                    "text_width": 800,
-                    "text_height": 945,
-                    "line_spacing": 4,
-                    "border_thickness": 1,
-                    "border_color": "#ffffff",
-                    "padding": 0,
-                    "insertwidth": 2
-                }
-        self.config = self.default_config.copy()
-
         self.root = root
         self.root.geometry("800x495")
         self.root.title("ZenEdit")
         self.config_file = "editor_config.json"
         self.auto_save_file = "default_autosave.txt"
         self.auto_save_enabled = tk.BooleanVar(value=True)
-        self.auto_save_enabled.trace('w', lambda *args: self.update_config("auto_save_enabled", self.auto_save_enabled.get()))
+        self.auto_save_enabled.trace('w', self.update_config_auto_save)
         self.auto_save_interval = 5000
+        self.default_config = {
+            "root_bg_color": "#1e1e1e",
+            "font_family": "Arial",
+            "font_size": 16,
+            "font_bold": False,
+            "font_italic": False,
+            "bg_color": "#1e1e1e",
+            "fg_color": "#ffffff",
+            "caret_cursor_color": "white",
+            "selection_color": "#3399ff",
+            "selection_text_color": "#ffffff",
+            "caret_cursor": False,
+            "text_width": 800,
+            "text_height": 945,
+            "line_spacing": 4,
+            "border_thickness": 1,
+            "border_color": "#ffffff",
+            "padding": 0,
+            "insertwidth": 2
+        }
+        self.config = self.default_config.copy()
+        self.fullScreenState = False
+        self.root_bg_image_visible = False
+        self.load_config()
+        self.setup_ui()
 
+    def load_config(self):
+        try:
+            with open(self.config_file, "r") as file:
+                file_config = json.load(file)
+                self.config.update(file_config)
+        except FileNotFoundError:
+            self.config = self.default_config.copy()
+
+    def setup_ui(self):
+        self.setup_icon()
+        self.setup_frame_and_text_area()
+        self.setup_menus()
+        self.setup_bindings()
+        self.auto_save()
+
+    def setup_icon(self):
         script_dir = os.path.dirname(os.path.realpath(__file__))
         icon_path = os.path.join(script_dir, 'zenedit.png')
-
         img = tk.PhotoImage(file=icon_path)
         self.root.iconphoto(False, img)
 
-        self.load_config()
-        self.fullScreenState = False
-        self.root_bg_image_visible = False
+    def setup_frame_and_text_area(self):
+        self.frame = tk.Frame(self.root, bg=self.config["bg_color"])
+        self.frame.pack(expand=True)
+        self.frame.config(width=self.config["text_width"], height=self.config["text_height"])
+        self.frame.pack_propagate(False)
 
-        self.setup_bindings()
-        self.create_menus()
-        self.setup_ui()
+        self.current_font = font.Font(
+            family=self.config["font_family"],
+            size=self.config["font_size"],
+            weight="bold" if self.config["font_bold"] else "normal",
+            slant="italic" if self.config["font_italic"] else "roman"
+        )
 
-        self.auto_save()
+        self.text_area = tk.Text(
+            self.frame,
+            font=self.current_font,
+            undo=True,
+            bg=self.config["bg_color"],
+            fg=self.config["fg_color"],
+            insertbackground=self.config["caret_cursor_color"],
+            insertwidth=self.config["insertwidth"],
+            spacing3=self.config["line_spacing"],
+            borderwidth=0,
+            wrap=tk.WORD,
+            highlightthickness=self.config["border_thickness"],
+            highlightbackground=self.config["border_color"],
+            highlightcolor=self.config["border_color"],
+            selectbackground=self.config["selection_color"],
+            selectforeground=self.config["selection_text_color"]
+        )
+        self.text_area.pack(side="top", fill="both", expand=True)
 
-    def load_config(self):
-            if os.path.isfile(self.config_file):
-                with open(self.config_file, "r") as file:
-                    file_config = json.load(file)
-                    
-                    self.config.update(file_config)
+    def update_config_auto_save(self, *args):
+        self.update_config("auto_save_enabled", self.auto_save_enabled.get())
+
+    def update_config(self, key, value):
+        self.config[key] = value
+        self.save_config()
+
+    def save_config(self):
+        with open(self.config_file, 'w') as file:
+            json.dump(self.config, file, indent=4)
 
     def setup_bindings(self):
+        self.text_area.bind("<Control-s>", self.save_file)
+        self.text_area.bind("<Control-S>", self.save_file)
+        self.text_area.bind("<Control-z>", self.undo_text)
+        self.text_area.bind("<Control-Z>", self.undo_text)
+        self.text_area.bind("<Control-y>", self.redo_text)
+        self.text_area.bind("<Control-Y>", self.redo_text)
+        self.text_area.bind("<Control-a>", self.select_all)
+        self.text_area.bind("<Control-A>", self.select_all)
+        self.text_area.bind("<Control-x>", self.cut_text)
+        self.text_area.bind("<Control-X>", self.cut_text)
+        self.text_area.bind("<Control-c>", self.copy_text)
+        self.text_area.bind("<Control-C>", self.copy_text)
+        self.text_area.bind("<Control-v>", self.paste_text)
+        self.text_area.bind("<Control-V>", self.paste_text)
+    
         self.root.bind("<Control-q>", lambda event: self.quit())
         self.root.bind("<Control-Q>", lambda event: self.quit())
         self.root.bind("<F2>", lambda event: self.toggle_border_visibility())
@@ -82,7 +141,7 @@ class ZenEdit:
         self.root.bind("<Control-Alt-s>", lambda event: self.save_file())
         self.root.bind("<Control-Alt-S>", lambda event: self.save_file())
 
-    def create_menus(self):
+    def setup_menus(self):
         self.menu = tk.Menu(self.root)
         self.root.config(menu=self.menu, bg=self.config["root_bg_color"])
 
@@ -164,58 +223,12 @@ class ZenEdit:
         self.menu.add_cascade(label="Settings", menu=self.settings_menu)
         self.menu.add_command(label="About", command=self.show_about)
 
-    def setup_ui(self):
-        self.frame = tk.Frame(self.root, bg=self.config["bg_color"])
-        self.frame.pack(expand=True)
-        self.frame.config(width=self.config["text_width"], height=self.config["text_height"])
-        self.frame.pack_propagate(False)
-
-        self.current_font = font.Font(
-            family=self.config["font_family"],
-            size=self.config["font_size"],
-            weight="bold" if self.config["font_bold"] else "normal",
-            slant="italic" if self.config["font_italic"] else "roman"
-        )
-
-        self.text_area = tk.Text(
-            self.frame,
-            font=self.current_font,
-            undo=True,
-            bg=self.config["bg_color"],
-            fg=self.config["fg_color"],
-            insertbackground=self.config["caret_cursor_color"],
-            insertwidth=self.config["insertwidth"],
-            spacing3=self.config["line_spacing"],
-            borderwidth=0,
-            wrap=tk.WORD,
-            highlightthickness=self.config["border_thickness"],
-            highlightbackground=self.config["border_color"],
-            highlightcolor=self.config["border_color"],
-            selectbackground=self.config["selection_color"],
-            selectforeground=self.config["selection_text_color"]
-        )
-        self.text_area.tag_configure("blink", foreground=self.config["fg_color"], background=self.config["bg_color"])
-        self.text_area.pack(side="top", fill="both", expand="yes")
-
-        self.text_area.bind("<Control-s>", self.save_file)
-        self.text_area.bind("<Control-S>", self.save_file)
-        self.text_area.bind("<Control-z>", self.undo_text)
-        self.text_area.bind("<Control-Z>", self.undo_text)
-        self.text_area.bind("<Control-y>", self.redo_text)
-        self.text_area.bind("<Control-Y>", self.redo_text)
-        self.text_area.bind("<Control-a>", self.select_all)
-        self.text_area.bind("<Control-A>", self.select_all)
-        self.text_area.bind("<Control-x>", self.cut_text)
-        self.text_area.bind("<Control-X>", self.cut_text)
-        self.text_area.bind("<Control-c>", self.copy_text)
-        self.text_area.bind("<Control-C>", self.copy_text)
-        self.text_area.bind("<Control-v>", self.paste_text)
-        self.text_area.bind("<Control-V>", self.paste_text)
-
-    def update_config(self, key, value):
-        self.config[key] = value
-        self.save_config()
-        
+    def auto_save(self):
+            if self.auto_save_enabled.get():  
+                filepath = self.current_file_path if hasattr(self, 'current_file_path') and self.current_file_path else self.auto_save_file
+                with open(filepath, "w") as file:
+                    file.write(self.text_area.get(1.0, tk.END))
+            self.root.after(self.auto_save_interval, self.auto_save)
 #File
     def new_file(self):
         response = None
@@ -238,7 +251,7 @@ class ZenEdit:
             with open(filepath, "r") as file:
                 self.text_area.delete(1.0, tk.END)
                 self.text_area.insert(tk.END, file.read())
-            self.current_file_path = filepath  # Store the current file path
+            self.current_file_path = filepath  
             self.root.title(f"ZenEdit - {os.path.basename(filepath)}")
         except Exception as e:
             messagebox.showerror("Open File", f"Failed to open file: {e}")
@@ -249,7 +262,7 @@ class ZenEdit:
             filepath = filedialog.asksaveasfilename(defaultextension=".txt", filetypes=[("Text Files", "*.txt"), ("All Files", "*.*")])
             if not filepath:
                 return
-            self.current_file_path = filepath  # Store the new file path
+            self.current_file_path = filepath 
 
         try:
             with open(filepath, "w") as file:
@@ -265,7 +278,7 @@ class ZenEdit:
         try:
             with open(filepath, "w") as file:
                 file.write(self.text_area.get(1.0, tk.END))
-            self.current_file_path = filepath  # Update current file path
+            self.current_file_path = filepath  
             self.root.title(f"ZenEdit - {os.path.basename(filepath)}")
         except Exception as e:
             messagebox.showerror("Save As File", f"Failed to save file: {e}")
@@ -321,9 +334,7 @@ class ZenEdit:
             search_entry.focus_set()
             case_sensitive = tk.BooleanVar(value=False)
             tk.Checkbutton(search_window, text="Case Sensitive", variable=case_sensitive).pack(side="left")
-
             highlight_tag = "search_highlight"
-            # Use user-selected colors for highlighting
             highlight_background = self.text_area.cget("selectbackground")
             highlight_foreground = self.text_area.cget("selectforeground")
             self.text_area.tag_configure(highlight_tag, background=highlight_background, foreground=highlight_foreground)
@@ -332,40 +343,31 @@ class ZenEdit:
                 search_query = search_entry.get()
                 if not search_query:
                     return
-
                 start_idx = '1.0' if not next else self.text_area.index(tk.INSERT) + '+1c'
                 search_args = {'nocase': not case_sensitive.get(), 'regexp': False}
-                self.text_area.tag_remove(highlight_tag, "1.0", tk.END)  # Clear previous highlights
-
+                self.text_area.tag_remove(highlight_tag, "1.0", tk.END) 
                 search_idx = self.text_area.search(search_query, start_idx, stopindex=tk.END, **search_args)
-
                 if not search_idx and next:
-                    # Restart search from beginning if 'next' was clicked and no result found
                     search_idx = self.text_area.search(search_query, "1.0", stopindex=tk.END, **search_args)
-
                 if search_idx:
                     end_idx = f"{search_idx}+{len(search_query)}c"
                     self.text_area.tag_add(highlight_tag, search_idx, end_idx)
                     self.text_area.mark_set(tk.INSERT, end_idx)
                     self.text_area.see(search_idx)
 
-                    # Keep track of the last search position for potential selection later
                     self.last_search_start = search_idx
                     self.last_search_end = end_idx
                 else:
                     messagebox.showinfo("Search", "Text not found.")
 
             def close_search():
-                # Remove highlight and select the last found word when closing the search window
                 self.text_area.tag_remove(highlight_tag, "1.0", tk.END)
                 if hasattr(self, 'last_search_start') and hasattr(self, 'last_search_end'):
                     self.text_area.tag_add(tk.SEL, self.last_search_start, self.last_search_end)
                     self.text_area.mark_set(tk.INSERT, self.last_search_end)
                     self.text_area.see(self.last_search_start)
                 search_window.destroy()
-
             search_window.protocol("WM_DELETE_WINDOW", close_search)
-
             tk.Button(search_window, text="Find", command=do_search).pack(side="left")
             tk.Button(search_window, text="Next", command=lambda: do_search(next=True)).pack(side="left")
             tk.Button(search_window, text="Close", command=close_search).pack(side="left")
@@ -374,18 +376,12 @@ class ZenEdit:
     def replace_text(self, event=None):
         replace_window = tk.Toplevel(self.root)
         replace_window.title("Replace Text")
-
-        # Find what label and entry
         tk.Label(replace_window, text="Find what:").pack(side=tk.LEFT)
         find_entry = tk.Entry(replace_window)
         find_entry.pack(side=tk.LEFT, fill=tk.X, expand=True)
-
-        # Replace with label and entry
         tk.Label(replace_window, text="Replace with:").pack(side=tk.LEFT)
         replace_entry = tk.Entry(replace_window)
         replace_entry.pack(side=tk.LEFT, fill=tk.X, expand=True)
-
-        # Case sensitivity checkbox
         case_sensitive = tk.BooleanVar(value=False)
         tk.Checkbutton(replace_window, text="Case Sensitive", variable=case_sensitive).pack(side=tk.LEFT)
 
@@ -404,7 +400,7 @@ class ZenEdit:
                     lower_query = search_query.lower()
                     count = lower_text.count(lower_query)
                     
-                    updated_text = all_text[:0]  # Keep the text up to the first character for initialization
+                    updated_text = all_text[:0]
                     start = 0
                     while True:
                         idx = lower_text.find(lower_query, start)
@@ -418,18 +414,13 @@ class ZenEdit:
                 self.text_area.insert("1.0", updated_text)
                 messagebox.showinfo("Replace", f"Replaced {count} occurrences of '{search_query}' with '{replacement}'.")
                 replace_window.destroy()
-
         replace_button = tk.Button(replace_window, text="Replace All", command=do_replace)
         replace_button.pack(side=tk.LEFT)
-
         close_button = tk.Button(replace_window, text="Close", command=replace_window.destroy)
         close_button.pack(side=tk.LEFT)
-
         find_entry.focus_set()
         replace_window.bind('<Return>', lambda e: do_replace())
 
-
-        # Focus on the find entry
         find_entry.focus_set()
 
     def goto_line(self):
@@ -506,11 +497,9 @@ class ZenEdit:
     def toggle_border_visibility(self):
         current_thickness = self.text_area.cget("highlightthickness")
         if current_thickness > 0:
-            # Save the current thickness before setting to 0
             self.config['border_thickness'] = current_thickness
             self.text_area.config(highlightthickness=0)
         else:
-            # Restore the saved thickness
             self.text_area.config(highlightthickness=self.config['border_thickness'])
 
         self.save_config()
@@ -523,12 +512,10 @@ class ZenEdit:
 
     def toggle_caret_cursor_visibility(self):
         if self.text_area['insertwidth'] > 1:
-            # Save the current insertwidth to the configuration before hiding the cursor
             self.config['insertwidth'] = self.text_area['insertwidth']
             self.text_area.config(insertwidth=0)
         else:
-            # Restore the insertwidth from the configuration when showing the cursor
-            insertwidth = self.config.get('insertwidth', 2)  # Default to 2 if not found
+            insertwidth = self.config.get('insertwidth', 2)
             self.text_area.config(insertwidth=insertwidth)
 
     def toggle_caret_cursor_blink(self):
@@ -579,7 +566,7 @@ class ZenEdit:
             preview_font = font.Font(family=font_name, size=size, weight=bold, slant=italic)
             preview_label.config(font=preview_font)
 
-        def apply_font(*args):  # Added *args to handle the event parameter
+        def apply_font(*args): 
             self.config["font_family"] = font_listbox.get(font_listbox.curselection()) or self.config.get("font_family", "Arial")
             self.config["font_size"] = font_size.get()
             self.config["font_bold"] = is_bold.get()
@@ -593,22 +580,17 @@ class ZenEdit:
             self.text_area.config(font=self.current_font)
             self.save_config()
             font_window.destroy()
-
         font_listbox.bind("<<ListboxSelect>>", update_preview)
         is_bold.trace('w', update_preview)
         is_italic.trace('w', update_preview)
         font_size.trace('w', update_preview)
         font_window.bind('<Return>', apply_font)
-
         for fnt in font.families():
             font_listbox.insert(tk.END, fnt)
-
         apply_button = tk.Button(font_window, text="Apply", command=apply_font)
         apply_button.pack(pady=10)
 
-        update_preview()  # Initial preview update
-
-
+        update_preview() 
 
     def change_font_size(self):
             font_size = simpledialog.askinteger(
@@ -637,7 +619,6 @@ class ZenEdit:
             self.save_config()
         else:
             messagebox.showerror("Invalid Spacing", "Line spacing must be a positive number.")
-
 
     def align_left(self):
             self.text_area.tag_configure("left", justify="left")
@@ -679,7 +660,6 @@ class ZenEdit:
                 )
                 if not image_path:
                     return
-
                 try:
                     self.bg_image = tk.PhotoImage(file=image_path)
                     if hasattr(self, 'bg_label'):
@@ -773,10 +753,8 @@ class ZenEdit:
                 messagebox.showinfo("Reset to Default", "The theme has been reset to default.")
 
     def apply_config(self):
-                # Update the root window's background color
                 self.root.config(bg=self.config["root_bg_color"])
 
-                # Update the text area's font, background color, foreground color, etc.
                 current_font = font.Font(family=self.config["font_family"],
                                         size=self.config["font_size"],
                                         weight="bold" if self.config["font_bold"] else "normal",
@@ -793,39 +771,27 @@ class ZenEdit:
                                     highlightthickness=self.config["border_thickness"],
                                     insertwidth=self.config["insertwidth"])
 
-                # Update the frame and text area size based on configuration
                 self.frame.config(width=self.config["text_width"], height=self.config["text_height"])
-                self.frame.pack_propagate(False)  # This makes the frame not to resize to fit its content
+                self.frame.pack_propagate(False) 
                 self.text_area.config(width=self.config["text_width"], height=self.config["text_height"])
     
     def toggle_auto_save(self):
-            # This method will be called whenever the autosave menu item is toggled
             if self.auto_save_enabled.get():
                 messagebox.showinfo("Autosave Enabled", "Autosave feature has been enabled.")
             else:
                 messagebox.showinfo("Autosave Disabled", "Autosave feature has been disabled.")
 
-    def auto_save(self):
-            if self.auto_save_enabled.get():  # Check if autosave is enabled
-                # Determine the file path: use the current file path if available, otherwise fallback to a default
-                filepath = self.current_file_path if hasattr(self, 'current_file_path') and self.current_file_path else self.auto_save_file
-                with open(filepath, "w") as file:
-                    file.write(self.text_area.get(1.0, tk.END))
-            self.root.after(self.auto_save_interval, self.auto_save)
-
     def show_about(self):
-        messagebox.showinfo("About ZenEdit", "ZenEdit v2.0\nA simple text editor built with Tkinter.")
+        messagebox.showinfo("About ZenEdit", "ZenEdit v2.0\nA simple text editor built with Tkinter. by Seehrum")
 
     def toggle_text_blink(self, event=None):
         if hasattr(self, 'is_blinking') and self.is_blinking:
-            # Stop blinking
             self.is_blinking = False
             if hasattr(self, 'blink_id'):
                 self.root.after_cancel(self.blink_id)
                 del self.blink_id
             self.text_area.tag_remove("blink", "1.0", "end")
         else:
-            # Start blinking, ask user for blink speed
             blink_speed = simpledialog.askinteger("Blink Speed", "Enter blink speed in milliseconds:", initialvalue=500)
             if blink_speed is not None:
                 self.blink_speed = blink_speed
@@ -835,8 +801,6 @@ class ZenEdit:
     def start_blinking(self):
         if not self.is_blinking:
             return
-
-        # Use the latest configuration for colors
         bg_color = self.config["bg_color"]
         fg_color = self.config["fg_color"]
 
@@ -851,7 +815,7 @@ class ZenEdit:
     def toggle_menu_view(self):
         if not self.fullScreenState:
             if self.root.cget('menu'):
-                self.root.config(menu='')  # Hide the menu
+                self.root.config(menu='') 
             else:
                 self.root.config(menu=self.menu)
 
