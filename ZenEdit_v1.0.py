@@ -151,7 +151,6 @@ class ZenEdit:
         self.format_menu = tk.Menu(self.menu, tearoff=0)
         self.settings_menu = tk.Menu(self.menu, tearoff=0)
 
-        
         self.file_menu.add_command(label="New (CTRL+N)", command=self.new_file)
         self.file_menu.add_command(label="Open (CTRL+O)", command=self.open_file)
         self.file_menu.add_command(label="Save (CTRL+S)", command=self.save_file)
@@ -159,7 +158,6 @@ class ZenEdit:
         self.file_menu.add_separator()
         self.file_menu.add_command(label="Exit (CTRL+Q)", command=self.quit)
 
-        
         self.edit_menu.add_command(label="Undo (CTRL+Z)", command=self.undo_text)
         self.edit_menu.add_command(label="Redo (CTRL+Y)", command=self.redo_text)
         self.edit_menu.add_separator()
@@ -174,7 +172,6 @@ class ZenEdit:
         self.edit_menu.add_separator()
         self.edit_menu.add_command(label="Toggle Line Numbers (F5)", command=self.toggle_line_numbers)
 
-        
         self.view_menu.add_command(label="FullScreen (F11)", command=self.toggle_full_screen)
         self.view_menu.add_separator()
         self.view_menu.add_command(label="Word/Character Count (CTRL+SHIFT+G)", command=self.show_word_char_count)
@@ -189,7 +186,6 @@ class ZenEdit:
         self.view_menu.add_command(label="Toggle Caret Cursor Blink", command=self.toggle_caret_cursor_blink)
         self.view_menu.add_command(label="Set Caret Cursor Blink Speed", command=self.set_caret_cursor_blink_speed)
         
-        
         self.format_menu.add_command(label="Change Font", command=self.change_font)
         self.format_menu.add_command(label="Change Font Size", command=self.change_font_size)
         self.format_menu.add_separator()
@@ -199,7 +195,6 @@ class ZenEdit:
         self.format_menu.add_command(label="Center", command=self.align_center)
         self.format_menu.add_command(label="Align Right", command=self.align_right)
 
-        
         self.settings_menu.add_command(label="Toggle Root Background Image", command=self.toggle_root_background_image)
         self.settings_menu.add_command(label="Change Root Background Color", command=self.change_root_bg_color)
         self.settings_menu.add_command(label="Change Text Area Background Color", command=self.change_text_area_bg_color)
