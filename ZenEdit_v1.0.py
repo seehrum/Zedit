@@ -780,7 +780,7 @@ class ZenEdit:
                 messagebox.showinfo("Autosave Disabled", "Autosave feature has been disabled.")
 
     def show_about(self):
-        messagebox.showinfo("About ZenEdit", "ZenEdit v2.0\nA simple text editor built with Tkinter. by Seehrum")
+        messagebox.showinfo("About ZenEdit", "ZenEdit v1.0\nA simple text editor built with Tkinter. by Seehrum")
 
     def toggle_text_blink(self, event=None):
         if hasattr(self, 'is_blinking') and self.is_blinking:
